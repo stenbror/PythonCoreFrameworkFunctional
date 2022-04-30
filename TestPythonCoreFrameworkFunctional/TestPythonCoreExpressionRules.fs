@@ -86,3 +86,19 @@ module ExpressionsRulesTests =
          
          Assert.Equal(ASTNode.Tuple(0u, 2u, Token.PyLeftParen(0u, 1u, [||]), ASTNode.Empty, Token.PyRightParen(1u, 2u, [|  |]) ), node)
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for empty list``() =
+         let stream = [ Token.PyLeftBracket(0u, 1u, [|  |]); Token.PyRightBracket(1u, 2u, [|  |]); Token.EOF(2u) ]
+         let node, rest = PythonCoreParser.ParseAtom stream
+         
+         Assert.Equal(ASTNode.List(0u, 2u, Token.PyLeftBracket(0u, 1u, [||]), ASTNode.Empty, Token.PyRightBracket(1u, 2u, [|  |]) ), node)
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for empty dictionary``() =
+         let stream = [ Token.PyLeftCurly(0u, 1u, [|  |]); Token.PyRightCurly(1u, 2u, [|  |]); Token.EOF(2u) ]
+         let node, rest = PythonCoreParser.ParseAtom stream
+         
+         Assert.Equal(ASTNode.Dictionary(0u, 2u, Token.PyLeftCurly(0u, 1u, [||]), ASTNode.Empty, Token.PyRightCurly(1u, 2u, [|  |]) ), node)
+         Assert.True(rest.Length = 1)

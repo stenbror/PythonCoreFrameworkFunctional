@@ -112,7 +112,20 @@ module PythonCoreParser =
                         let op2 = List.head rest
                         ASTNode.Tuple(spanStart, GetStartPosition(rest2), op1, ASTNode.Empty, op2), rest2
                 |   _ ->        ASTNode.Empty, rest // TODO Fix later!
-        |   Some(Token.PyLeftBracket(s, e, _ ), rest)
+        |   Some(Token.PyLeftBracket(s, e, _ ), rest) ->
+                let spanStart = GetStartPosition(stream)
+                let op1 = List.head stream
+                match TryToken rest with
+                |   Some(Token.PyRightBracket( _ , _ , _ ), rest2) ->
+                        let op2 = List.head rest
+                        ASTNode.List(spanStart, GetStartPosition(rest2), op1, ASTNode.Empty, op2), rest2
+                |   _ ->        ASTNode.Empty, rest // TODO Fix later!
         |   Some(Token.PyLeftCurly(s, e, _ ), rest) ->
-                ASTNode.Empty, rest
+                let spanStart = GetStartPosition(stream)
+                let op1 = List.head stream
+                match TryToken rest with
+                |   Some(Token.PyRightCurly( _ , _ , _ ), rest2) ->
+                        let op2 = List.head rest
+                        ASTNode.Dictionary(spanStart, GetStartPosition(rest2), op1, ASTNode.Empty, op2), rest2
+                |   _ ->        ASTNode.Empty, rest // TODO Fix later!
         |   _   ->  raise ( SyntaxError(GetStartPosition(stream), "Expecting an atom literal!") )
