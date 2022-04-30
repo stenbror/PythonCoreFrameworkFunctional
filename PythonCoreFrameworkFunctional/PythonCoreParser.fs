@@ -13,6 +13,13 @@ type Token =
     |   Name of uint * uint * string * Trivia array
     |   Number of uint * uint * string * Trivia array
     |   String of uint * uint * string * Trivia array
+    |   PyLeftParen of uint * uint * Trivia array
+    |   PyLeftBracket of uint * uint * Trivia array
+    |   PyLeftCurly of uint * uint * Trivia array
+    |   PyRightParen of uint * uint * Trivia array
+    |   PyRightBracket of uint * uint * Trivia array
+    |   PyRightCurly of uint * uint * Trivia array
+    |   PyAwait of uint * uint * Trivia array
     static member GetStartPosition(symbol: Token) : uint =
         match symbol with
         |   EOF(s)
@@ -22,7 +29,15 @@ type Token =
         |   PyEllipsis(s, _ , _)
         |   Name(s, _, _, _ )
         |   Number(s, _ , _ , _ )
-        |   String(s, _ , _ , _) -> s
+        |   String(s, _ , _ , _ )
+        |   PyLeftParen(s , _ , _ )
+        |   PyLeftBracket(s, _ , _ )
+        |   PyLeftCurly(s, _ , _ )
+        |   PyLeftCurly(s, _ , _ )
+        |   PyRightParen(s, _ , _ )
+        |   PyRightBracket(s, _ , _ )
+        |   PyRightCurly(s, _ , _ )
+        |   PyAwait(s, _ , _ ) -> s
         |   _   ->  0u
     
 type ASTNode =
@@ -34,7 +49,9 @@ type ASTNode =
     |   Name of uint * uint * Token
     |   Number of uint * uint * Token
     |   String of uint * uint * Token array
-    
+    |   Tuple of uint * uint * Token * ASTNode * Token
+    |   List of uint * uint * Token * ASTNode * Token
+    |   Dictionary of uint * uint * Token * ASTNode * Token
    
 type TokenStream = Token list
 exception SyntaxError of uint * string
@@ -87,4 +104,15 @@ module PythonCoreParser =
                                 |       _ ->    false
                         do ()
                 ASTNode.String(spanStart, GetStartPosition(restAgain), List.toArray(List.rev nodes)), restAgain
+        |   Some(Token.PyLeftParen(s, e, _ ), rest) ->
+                let spanStart = GetStartPosition(stream)
+                let op1 = List.head stream
+                match TryToken rest with
+                |   Some(Token.PyRightParen( _ , _ , _ ), rest2) ->
+                        let op2 = List.head rest
+                        ASTNode.Tuple(spanStart, GetStartPosition(rest2), op1, ASTNode.Empty, op2), rest2
+                |   _ ->        ASTNode.Empty, rest // TODO Fix later!
+        |   Some(Token.PyLeftBracket(s, e, _ ), rest)
+        |   Some(Token.PyLeftCurly(s, e, _ ), rest) ->
+                ASTNode.Empty, rest
         |   _   ->  raise ( SyntaxError(GetStartPosition(stream), "Expecting an atom literal!") )
