@@ -120,3 +120,89 @@ module ExpressionsRulesTests =
                                         Token.Name(6u, 9u, "abc", [|  |])), [||])
                                         , node)
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for empty power rule``() =
+         let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
+         let node, rest = PythonCoreParser.ParsePower stream
+         
+         Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for power rule``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyPower(4u, 5u, [|  |])
+              Token.Name(6u, 9u, "abc", [|  |])
+              Token.EOF(9u)
+         ]
+         let node, rest = PythonCoreParser.ParsePower stream
+         
+         Assert.Equal(
+                   ASTNode.Power(0u, 9u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyPower(4u, 5u, [|  |]),
+                   ASTNode.Name(6u, 9u, Token.Name(6u, 9u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+               
+    [<Fact>]
+    let ``Test Atom Expression rule for empty factor rule``() =
+         let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
+         let node, rest = PythonCoreParser.ParseFactor stream
+         
+         Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for factor plus rule``() =
+         let stream = [
+              Token.PyPlus(0u, 1u, [|  |])
+              Token.Name(2u, 5u, "abc", [|  |])
+              Token.EOF(5u)
+         ]
+         let node, rest = PythonCoreParser.ParseFactor stream
+         
+         Assert.Equal(
+                   ASTNode.UnaryPlus(0u, 5u, 
+                   Token.PyPlus(0u, 1u, [|  |]),
+                   ASTNode.Name(2u, 5u, Token.Name(2u, 5u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for factor minus rule``() =
+         let stream = [
+              Token.PyMinus(0u, 1u, [|  |])
+              Token.Name(2u, 5u, "abc", [|  |])
+              Token.EOF(5u)
+         ]
+         let node, rest = PythonCoreParser.ParseFactor stream
+         
+         Assert.Equal(
+                   ASTNode.UnaryMinus(0u, 5u, 
+                   Token.PyMinus(0u, 1u, [|  |]),
+                   ASTNode.Name(2u, 5u, Token.Name(2u, 5u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for factor bit invert rule``() =
+         let stream = [
+              Token.PyBitInvert(0u, 1u, [|  |])
+              Token.Name(2u, 5u, "abc", [|  |])
+              Token.EOF(5u)
+         ]
+         let node, rest = PythonCoreParser.ParseFactor stream
+         
+         Assert.Equal(
+                   ASTNode.UnaryBitInvert(0u, 5u, 
+                   Token.PyBitInvert(0u, 1u, [|  |]),
+                   ASTNode.Name(2u, 5u, Token.Name(2u, 5u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
