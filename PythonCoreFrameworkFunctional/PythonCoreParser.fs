@@ -1,5 +1,6 @@
 namespace PythonCoreFrameworkFunctional
 
+
 type Trivia =
     |   Empty
 
@@ -20,6 +21,7 @@ type Token =
     |   PyRightBracket of uint * uint * Trivia array
     |   PyRightCurly of uint * uint * Trivia array
     |   PyAwait of uint * uint * Trivia array
+    |   PyDot of uint * uint * Trivia array
     static member GetStartPosition(symbol: Token) : uint =
         match symbol with
         |   EOF(s)
@@ -37,7 +39,8 @@ type Token =
         |   PyRightParen(s, _ , _ )
         |   PyRightBracket(s, _ , _ )
         |   PyRightCurly(s, _ , _ )
-        |   PyAwait(s, _ , _ ) -> s
+        |   PyAwait(s, _ , _ )
+        |   PyDot(s, _ , _ ) -> s
         |   _   ->  0u
     
 type ASTNode =
@@ -52,6 +55,7 @@ type ASTNode =
     |   Tuple of uint * uint * Token * ASTNode * Token
     |   List of uint * uint * Token * ASTNode * Token
     |   Dictionary of uint * uint * Token * ASTNode * Token
+    |   AtomExpr of uint * uint * Token * ASTNode * ASTNode array
    
 type TokenStream = Token list
 exception SyntaxError of uint * string
@@ -129,3 +133,23 @@ module PythonCoreParser =
                         ASTNode.Dictionary(spanStart, GetStartPosition(rest2), op1, ASTNode.Empty, op2), rest2
                 |   _ ->        ASTNode.Empty, rest // TODO Fix later!
         |   _   ->  raise ( SyntaxError(GetStartPosition(stream), "Expecting an atom literal!") )
+
+    and ParseAtomExpr(stream: TokenStream) : (ASTNode * TokenStream) =
+            let spanStart = GetStartPosition(stream)
+            let mutable restAgain = stream
+            let awaitOp = match TryToken stream with
+                          |  Some(Token.PyAwait( _ , _ , _ ), rest) ->
+                                  let op = List.head stream
+                                  restAgain <- rest
+                                  op
+                          |  _ -> Token.Empty
+            let right, rest2 = ParseAtom restAgain // This is the Atom rule.
+            let mutable trailerList : ASTNode list = []
+            // TODO Handle trailers here later
+            
+            
+            match awaitOp, trailerList with
+            |   Token.Empty, [] ->
+                    right, rest2
+            |   _  -> // TOIDO Fix rest2 with correct token stream
+                ASTNode.AtomExpr(spanStart, GetStartPosition(rest2), awaitOp, right, List.toArray(List.rev trailerList)), rest2

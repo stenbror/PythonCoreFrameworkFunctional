@@ -102,3 +102,21 @@ module ExpressionsRulesTests =
          
          Assert.Equal(ASTNode.Dictionary(0u, 2u, Token.PyLeftCurly(0u, 1u, [||]), ASTNode.Empty, Token.PyRightCurly(1u, 2u, [|  |]) ), node)
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for atom expr with no additional items``() =
+         let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
+         let node, rest = PythonCoreParser.ParseAtomExpr stream
+         
+         Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for atom expr with await``() =
+         let stream = [ Token.PyAwait(0u, 5u, [|  |]); Token.Name(6u, 9u, "abc", [|  |]); Token.EOF(9u) ]
+         let node, rest = PythonCoreParser.ParseAtomExpr stream
+         
+         Assert.Equal(ASTNode.AtomExpr(0u, 9u, Token.PyAwait(0u, 5u, [||]), ASTNode.Name(6u, 9u,
+                                        Token.Name(6u, 9u, "abc", [|  |])), [||])
+                                        , node)
+         Assert.True(rest.Length = 1)
