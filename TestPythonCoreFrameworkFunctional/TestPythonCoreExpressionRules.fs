@@ -403,3 +403,73 @@ module ExpressionsRulesTests =
               ), node)
          
          Assert.True(rest.Length = 1)
+              
+    [<Fact>]
+    let ``Test Atom Expression rule for empty shift rule``() =
+         let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
+         let node, rest = PythonCoreParser.ParseShift stream
+         
+         Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
+         Assert.True(rest.Length = 1)    
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for shift rule with shift left op``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyShiftLeft(4u, 5u, [|  |])
+              Token.Name(6u, 9u, "abc", [|  |])
+              Token.EOF(9u)
+         ]
+         let node, rest = PythonCoreParser.ParseShift stream
+         
+         Assert.Equal(
+                   ASTNode.ShiftLeft(0u, 9u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyShiftLeft(4u, 5u, [|  |]),
+                   ASTNode.Name(6u, 9u, Token.Name(6u, 9u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for shift rule with shift right op``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyShiftRight(4u, 5u, [|  |])
+              Token.Name(6u, 9u, "abc", [|  |])
+              Token.EOF(9u)
+         ]
+         let node, rest = PythonCoreParser.ParseShift stream
+         
+         Assert.Equal(
+                   ASTNode.ShiftRight(0u, 9u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyShiftRight(4u, 5u, [|  |]),
+                   ASTNode.Name(6u, 9u, Token.Name(6u, 9u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for shift rule with double shiftleft/shiftright op``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyShiftLeft(4u, 5u, [|  |])
+              Token.Name(6u, 9u, "abc", [|  |])
+              Token.PyShiftRight(10u, 11u, [|  |])
+              Token.Name(12u, 15u, "abc", [|  |])
+              Token.EOF(15u)
+         ]
+         let node, rest = PythonCoreParser.ParseShift stream
+         
+         Assert.Equal(
+                   ASTNode.ShiftRight(0u, 15u, 
+                        ASTNode.ShiftLeft(0u, 10u, 
+                             ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                             Token.PyShiftLeft(4u, 5u, [|  |]),
+                             ASTNode.Name(6u, 9u, Token.Name(6u, 9u, "abc", [|  |]) )),
+                        Token.PyShiftRight(10u, 11u, [|  |]),
+                        ASTNode.Name(12u, 15u, Token.Name(12u, 15u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
