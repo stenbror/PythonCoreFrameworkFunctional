@@ -28,6 +28,11 @@ type Token =
     |   PyPlus of uint * uint * Trivia array
     |   PyMinus of uint * uint * Trivia array
     |   PyBitInvert of uint * uint * Trivia array
+    |   PyMul of uint * uint * Trivia array
+    |   PyDiv of uint * uint * Trivia array
+    |   PyFloorDiv of uint * uint * Trivia array
+    |   PyMatrice of uint * uint * Trivia array
+    |   PyModulo of uint * uint * Trivia array
     static member GetStartPosition(symbol: Token) : uint =
         match symbol with
         |   EOF(s)
@@ -50,7 +55,12 @@ type Token =
         |   PyPower(s, _ , _ )
         |   PyPlus(s, _ , _ )
         |   PyMinus(s, _ , _)
-        |   PyBitInvert(s, _ , _ ) -> s 
+        |   PyBitInvert(s, _ , _ )
+        |   PyMul(s, _ , _ )
+        |   PyDiv(s, _ , _ )
+        |   PyFloorDiv(s, _ , _ )
+        |   PyMatrice(s, _ , _ )
+        |   PyModulo(s, _ , _ ) -> s
         |   _   ->  0u
     
 type ASTNode =
@@ -70,6 +80,11 @@ type ASTNode =
     |   UnaryPlus of uint * uint * Token * ASTNode
     |   UnaryMinus of uint * uint * Token * ASTNode
     |   UnaryBitInvert of uint * uint * Token * ASTNode
+    |   Mul of uint * uint * ASTNode * Token * ASTNode
+    |   Div of uint * uint * ASTNode * Token * ASTNode
+    |   FloorDiv of uint * uint * ASTNode * Token * ASTNode
+    |   Matrice of uint * uint * ASTNode * Token * ASTNode
+    |   Modulo of uint * uint * ASTNode * Token * ASTNode
    
 type TokenStream = Token list
 exception SyntaxError of uint * string
@@ -196,4 +211,41 @@ module PythonCoreParser =
         |  _ ->
                 ParseAtomExpr stream
         
+    and ParseTerm(stream: TokenStream) : (ASTNode * TokenStream) =
+        let spanStart = GetStartPosition(stream)
+        let mutable left, rest = ParseFactor stream
+        while   match TryToken rest with
+                |  Some(Token.PyMul( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        let right, rest3 = ParseFactor rest2
+                        left <- ASTNode.Mul(spanStart, GetStartPosition(rest3), left, op, right)
+                        rest <- rest3
+                        true
+                |  Some(Token.PyDiv( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        let right, rest3 = ParseFactor rest2
+                        left <- ASTNode.Div(spanStart, GetStartPosition(rest3), left, op, right)
+                        rest <- rest3
+                        true
+                |  Some(Token.PyFloorDiv( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        let right, rest3 = ParseFactor rest2
+                        left <- ASTNode.FloorDiv(spanStart, GetStartPosition(rest3), left, op, right)
+                        rest <- rest3
+                        true
+                |  Some(Token.PyMatrice( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        let right, rest3 = ParseFactor rest2
+                        left <- ASTNode.Matrice(spanStart, GetStartPosition(rest3), left, op, right)
+                        rest <- rest3
+                        true
+                |  Some(Token.PyModulo( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        let right, rest3 = ParseFactor rest2
+                        left <- ASTNode.Modulo(spanStart, GetStartPosition(rest3), left, op, right)
+                        rest <- rest3
+                        true
+                |  _ -> false
+                do ()
+        left, rest
         

@@ -206,3 +206,130 @@ module ExpressionsRulesTests =
               ), node)
          
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for empty term rule``() =
+         let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
+         let node, rest = PythonCoreParser.ParseTerm stream
+         
+         Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for term rule with mul op``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyMul(4u, 5u, [|  |])
+              Token.Name(6u, 9u, "abc", [|  |])
+              Token.EOF(9u)
+         ]
+         let node, rest = PythonCoreParser.ParseTerm stream
+         
+         Assert.Equal(
+                   ASTNode.Mul(0u, 9u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyMul(4u, 5u, [|  |]),
+                   ASTNode.Name(6u, 9u, Token.Name(6u, 9u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for term rule with div op``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyDiv(4u, 5u, [|  |])
+              Token.Name(6u, 9u, "abc", [|  |])
+              Token.EOF(9u)
+         ]
+         let node, rest = PythonCoreParser.ParseTerm stream
+         
+         Assert.Equal(
+                   ASTNode.Div(0u, 9u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyDiv(4u, 5u, [|  |]),
+                   ASTNode.Name(6u, 9u, Token.Name(6u, 9u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for term rule with matrice op``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyMatrice(4u, 5u, [|  |])
+              Token.Name(6u, 9u, "abc", [|  |])
+              Token.EOF(9u)
+         ]
+         let node, rest = PythonCoreParser.ParseTerm stream
+         
+         Assert.Equal(
+                   ASTNode.Matrice(0u, 9u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyMatrice(4u, 5u, [|  |]),
+                   ASTNode.Name(6u, 9u, Token.Name(6u, 9u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for term rule with modulo op``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyModulo(4u, 5u, [|  |])
+              Token.Name(6u, 9u, "abc", [|  |])
+              Token.EOF(9u)
+         ]
+         let node, rest = PythonCoreParser.ParseTerm stream
+         
+         Assert.Equal(
+                   ASTNode.Modulo(0u, 9u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyModulo(4u, 5u, [|  |]),
+                   ASTNode.Name(6u, 9u, Token.Name(6u, 9u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for term rule with floor div op``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyFloorDiv(4u, 6u, [|  |])
+              Token.Name(7u, 10u, "abc", [|  |])
+              Token.EOF(10u)
+         ]
+         let node, rest = PythonCoreParser.ParseTerm stream
+         
+         Assert.Equal(
+                   ASTNode.FloorDiv(0u, 10u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyFloorDiv(4u, 6u, [|  |]),
+                   ASTNode.Name(7u, 10u, Token.Name(7u, 10u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for term rule with double modulo op``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyModulo(4u, 5u, [|  |])
+              Token.Name(6u, 9u, "abc", [|  |])
+              Token.PyModulo(10u, 11u, [|  |])
+              Token.Name(12u, 15u, "abc", [|  |])
+              Token.EOF(15u)
+         ]
+         let node, rest = PythonCoreParser.ParseTerm stream
+         
+         Assert.Equal(
+                   ASTNode.Modulo(0u, 15u, 
+                        ASTNode.Modulo(0u, 10u, 
+                             ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                             Token.PyModulo(4u, 5u, [|  |]),
+                             ASTNode.Name(6u, 9u, Token.Name(6u, 9u, "abc", [|  |]) )),
+                        Token.PyModulo(10u, 11u, [|  |]),
+                        ASTNode.Name(12u, 15u, Token.Name(12u, 15u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
