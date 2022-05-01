@@ -1,7 +1,5 @@
 namespace PythonCoreFrameworkFunctional
 
-open System.Runtime.CompilerServices
-
 
 type Trivia =
     |   Empty
@@ -36,6 +34,7 @@ type Token =
     |   PyShiftLeft of uint * uint * Trivia array
     |   PyShiftRight of uint * uint * Trivia array
     |   PyBitAnd of uint * uint * Trivia array
+    |   PyBitXor of uint * uint * Trivia array
     static member GetStartPosition(symbol: Token) : uint =
         match symbol with
         |   EOF(s)
@@ -66,7 +65,8 @@ type Token =
         |   PyModulo(s, _ , _ )
         |   PyShiftLeft(s, _ , _ )
         |   PyShiftRight(s, _ , _ )
-        |   PyBitAnd(s, _ , _ ) -> s
+        |   PyBitAnd(s, _ , _ )
+        |   PyBitXor(s, _ , _ ) -> s
         |   _   ->  0u
     
 type ASTNode =
@@ -96,6 +96,7 @@ type ASTNode =
     |   ShiftLeft of uint * uint * ASTNode * Token * ASTNode
     |   ShiftRight of uint * uint * ASTNode * Token * ASTNode
     |   BitAnd of uint * uint * ASTNode * Token * ASTNode
+    |   BitXor of uint * uint * ASTNode * Token * ASTNode
    
 type TokenStream = Token list
 exception SyntaxError of uint * string
@@ -314,3 +315,16 @@ module PythonCoreParser =
                 do ()
         left, rest
         
+    and ParseXor(stream: TokenStream) : (ASTNode * TokenStream) =
+        let spanStart = GetStartPosition(stream)
+        let mutable left, rest = ParseAnd stream
+        while   match TryToken rest with
+                |  Some(Token.PyBitXor( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        let right, rest3 = ParseAnd rest2
+                        left <- ASTNode.BitXor(spanStart, GetStartPosition(rest3), left, op, right)
+                        rest <- rest3
+                        true
+                |  _ -> false
+                do ()
+        left, rest

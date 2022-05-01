@@ -524,3 +524,54 @@ module ExpressionsRulesTests =
               ), node)
          
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for empty bit xor rule``() =
+         let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
+         let node, rest = PythonCoreParser.ParseXor stream
+         
+         Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for shift rule with bit xor right op``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyBitXor(4u, 7u, [|  |])
+              Token.Name(8u, 11u, "abc", [|  |])
+              Token.EOF(11u)
+         ]
+         let node, rest = PythonCoreParser.ParseXor stream
+         
+         Assert.Equal(
+                   ASTNode.BitXor(0u, 11u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyBitXor(4u, 7u, [|  |]),
+                   ASTNode.Name(8u, 11u, Token.Name(8u, 11u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for shift rule with double xor and op``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyBitXor(4u, 7u, [|  |])
+              Token.Name(8u, 11u, "abc", [|  |])
+              Token.PyBitXor(12u, 15u, [|  |])
+              Token.Name(16u, 19u, "abc", [|  |])
+              Token.EOF(19u)
+         ]
+         let node, rest = PythonCoreParser.ParseXor stream
+         
+         Assert.Equal(
+                   ASTNode.BitXor(0u, 19u, 
+                        ASTNode.BitXor(0u, 12u, 
+                             ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                             Token.PyBitXor(4u, 7u, [|  |]),
+                             ASTNode.Name(8u, 11u, Token.Name(8u, 11u, "abc", [|  |]) )),
+                        Token.PyBitXor(12u, 15u, [|  |]),
+                        ASTNode.Name(16u, 19u, Token.Name(16u, 19u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
