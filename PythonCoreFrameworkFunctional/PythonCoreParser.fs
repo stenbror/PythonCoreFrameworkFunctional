@@ -35,6 +35,7 @@ type Token =
     |   PyModulo of uint * uint * Trivia array
     |   PyShiftLeft of uint * uint * Trivia array
     |   PyShiftRight of uint * uint * Trivia array
+    |   PyBitAnd of uint * uint * Trivia array
     static member GetStartPosition(symbol: Token) : uint =
         match symbol with
         |   EOF(s)
@@ -64,7 +65,8 @@ type Token =
         |   PyMatrice(s, _ , _ )
         |   PyModulo(s, _ , _ )
         |   PyShiftLeft(s, _ , _ )
-        |   PyShiftRight(s, _ , _ ) -> s
+        |   PyShiftRight(s, _ , _ )
+        |   PyBitAnd(s, _ , _ ) -> s
         |   _   ->  0u
     
 type ASTNode =
@@ -93,6 +95,7 @@ type ASTNode =
     |   Minus of uint * uint * ASTNode * Token * ASTNode
     |   ShiftLeft of uint * uint * ASTNode * Token * ASTNode
     |   ShiftRight of uint * uint * ASTNode * Token * ASTNode
+    |   BitAnd of uint * uint * ASTNode * Token * ASTNode
    
 type TokenStream = Token list
 exception SyntaxError of uint * string
@@ -291,6 +294,20 @@ module PythonCoreParser =
                         let op = List.head rest
                         let right, rest3 = ParseArith rest2
                         left <- ASTNode.ShiftRight(spanStart, GetStartPosition(rest3), left, op, right)
+                        rest <- rest3
+                        true
+                |  _ -> false
+                do ()
+        left, rest
+        
+    and ParseAnd(stream: TokenStream) : (ASTNode * TokenStream) =
+        let spanStart = GetStartPosition(stream)
+        let mutable left, rest = ParseShift stream
+        while   match TryToken rest with
+                |  Some(Token.PyBitAnd( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        let right, rest3 = ParseShift rest2
+                        left <- ASTNode.BitAnd(spanStart, GetStartPosition(rest3), left, op, right)
                         rest <- rest3
                         true
                 |  _ -> false
