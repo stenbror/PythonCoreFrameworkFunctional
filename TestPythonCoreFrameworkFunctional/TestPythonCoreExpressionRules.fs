@@ -643,3 +643,230 @@ module ExpressionsRulesTests =
               ), node)
          
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for empty comparison rule``() =
+         let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
+         let node, rest = PythonCoreParser.ParseComparison stream
+         
+         Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for comparison op less``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyLess(4u, 5u, [|  |])
+              Token.Name(7u, 10u, "abc", [|  |])
+              Token.EOF(10u)
+         ]
+         let node, rest = PythonCoreParser.ParseComparison stream
+         
+         Assert.Equal(
+                   ASTNode.Less(0u, 10u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyLess(4u, 5u, [|  |]),
+                   ASTNode.Name(7u, 10u, Token.Name(7u, 10u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for comparison op less equal``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyLessEqual(4u, 6u, [|  |])
+              Token.Name(7u, 10u, "abc", [|  |])
+              Token.EOF(10u)
+         ]
+         let node, rest = PythonCoreParser.ParseComparison stream
+         
+         Assert.Equal(
+                   ASTNode.LessEqual(0u, 10u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyLessEqual(4u, 6u, [|  |]),
+                   ASTNode.Name(7u, 10u, Token.Name(7u, 10u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for comparison op equal``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyEqual(4u, 5u, [|  |])
+              Token.Name(7u, 10u, "abc", [|  |])
+              Token.EOF(10u)
+         ]
+         let node, rest = PythonCoreParser.ParseComparison stream
+         
+         Assert.Equal(
+                   ASTNode.Equal(0u, 10u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyEqual(4u, 5u, [|  |]),
+                   ASTNode.Name(7u, 10u, Token.Name(7u, 10u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for comparison op greater equal``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyGreaterEqual(4u, 6u, [|  |])
+              Token.Name(7u, 10u, "abc", [|  |])
+              Token.EOF(10u)
+         ]
+         let node, rest = PythonCoreParser.ParseComparison stream
+         
+         Assert.Equal(
+                   ASTNode.GreaterEqual(0u, 10u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyGreaterEqual(4u, 6u, [|  |]),
+                   ASTNode.Name(7u, 10u, Token.Name(7u, 10u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for comparison op greater``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyGreater(4u, 5u, [|  |])
+              Token.Name(7u, 10u, "abc", [|  |])
+              Token.EOF(10u)
+         ]
+         let node, rest = PythonCoreParser.ParseComparison stream
+         
+         Assert.Equal(
+                   ASTNode.Greater(0u, 10u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyGreater(4u, 5u, [|  |]),
+                   ASTNode.Name(7u, 10u, Token.Name(7u, 10u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for comparison op not equal``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyNotEqual(4u, 6u, [|  |])
+              Token.Name(7u, 10u, "abc", [|  |])
+              Token.EOF(10u)
+         ]
+         let node, rest = PythonCoreParser.ParseComparison stream
+         
+         Assert.Equal(
+                   ASTNode.NotEqual(0u, 10u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyNotEqual(4u, 6u, [|  |]),
+                   ASTNode.Name(7u, 10u, Token.Name(7u, 10u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for comparison op in``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyIn(4u, 6u, [|  |])
+              Token.Name(7u, 10u, "abc", [|  |])
+              Token.EOF(10u)
+         ]
+         let node, rest = PythonCoreParser.ParseComparison stream
+         
+         Assert.Equal(
+                   ASTNode.In(0u, 10u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyIn(4u, 6u, [|  |]),
+                   ASTNode.Name(7u, 10u, Token.Name(7u, 10u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for comparison op is``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyIs(4u, 6u, [|  |])
+              Token.Name(7u, 10u, "abc", [|  |])
+              Token.EOF(10u)
+         ]
+         let node, rest = PythonCoreParser.ParseComparison stream
+         
+         Assert.Equal(
+                   ASTNode.Is(0u, 10u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyIs(4u, 6u, [|  |]),
+                   ASTNode.Name(7u, 10u, Token.Name(7u, 10u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for comparison op not in``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyNot(4u, 7u, [|  |])
+              Token.PyIn(8u, 10u, [|  |])
+              Token.Name(11u, 14u, "abc", [|  |])
+              Token.EOF(14u)
+         ]
+         let node, rest = PythonCoreParser.ParseComparison stream
+         
+         Assert.Equal(
+                   ASTNode.NotIn(0u, 14u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyNot(4u, 7u, [|  |]),
+                   Token.PyIn(8u, 10u, [|  |]),
+                   ASTNode.Name(11u, 14u, Token.Name(11u, 14u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for comparison op is not``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyIs(4u, 6u, [|  |])
+              Token.PyNot(7u, 10u, [|  |])
+              Token.Name(11u, 14u, "abc", [|  |])
+              Token.EOF(14u)
+         ]
+         let node, rest = PythonCoreParser.ParseComparison stream
+         
+         Assert.Equal(
+                   ASTNode.IsNot(0u, 14u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyIs(4u, 6u, [|  |]),
+                   Token.PyNot(7u, 10u, [|  |]),
+                   ASTNode.Name(11u, 14u, Token.Name(11u, 14u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for comparison rule with double less op``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyLessEqual(4u, 6u, [|  |])
+              Token.Name(8u, 11u, "abc", [|  |])
+              Token.PyLessEqual(12u, 14u, [|  |])
+              Token.Name(16u, 19u, "abc", [|  |])
+              Token.EOF(19u)
+         ]
+         let node, rest = PythonCoreParser.ParseComparison stream
+         
+         Assert.Equal(
+                   ASTNode.LessEqual(0u, 19u, 
+                        ASTNode.LessEqual(0u, 12u, 
+                             ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                             Token.PyLessEqual(4u, 6u, [|  |]),
+                             ASTNode.Name(8u, 11u, Token.Name(8u, 11u, "abc", [|  |]) )),
+                        Token.PyLessEqual(12u, 14u, [|  |]),
+                        ASTNode.Name(16u, 19u, Token.Name(16u, 19u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+        

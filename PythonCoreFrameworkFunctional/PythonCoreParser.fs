@@ -38,6 +38,15 @@ type Token =
     |   PyBitAnd of uint * uint * Trivia array
     |   PyBitXor of uint * uint * Trivia array
     |   PyBitOr of uint * uint * Trivia array
+    |   PyLess of uint * uint * Trivia array
+    |   PyLessEqual of uint * uint * Trivia array
+    |   PyEqual of uint * uint * Trivia array
+    |   PyGreaterEqual of uint * uint * Trivia array
+    |   PyGreater of uint * uint * Trivia array
+    |   PyNotEqual of uint * uint * Trivia array
+    |   PyIn of uint * uint * Trivia array
+    |   PyNot of uint * uint * Trivia array
+    |   PyIs of uint * uint * Trivia array
     static member GetStartPosition(symbol: Token) : uint =
         match symbol with
         |   EOF(s)
@@ -70,7 +79,15 @@ type Token =
         |   PyShiftRight(s, _ , _ )
         |   PyBitAnd(s, _ , _ )
         |   PyBitXor(s, _ , _ )
-        |   PyBitOr(s, _ , _ ) -> s
+        |   PyBitOr(s, _ , _ )
+        |   PyLess(s, _ , _ )
+        |   PyLessEqual(s, _ , _ )
+        |   PyEqual(s, _ , _ )
+        |   PyGreaterEqual(s, _ , _ )
+        |   PyGreater(s, _ , _ )
+        |   PyIn(s, _ , _ )
+        |   PyNot(s, _ , _ )
+        |   PyIs(s, _ , _ ) -> s
         |   _   ->  0u
     
 type ASTNode =
@@ -103,6 +120,16 @@ type ASTNode =
     |   BitXor of uint * uint * ASTNode * Token * ASTNode
     |   BitOr of uint * uint * ASTNode * Token * ASTNode
     |   StarExpr of uint * uint * Token * ASTNode
+    |   Less of uint * uint * ASTNode * Token * ASTNode
+    |   LessEqual of uint * uint * ASTNode * Token * ASTNode
+    |   Equal of uint * uint * ASTNode * Token * ASTNode
+    |   GreaterEqual of uint * uint * ASTNode * Token * ASTNode
+    |   Greater of uint * uint * ASTNode * Token * ASTNode
+    |   NotEqual of uint * uint * ASTNode * Token * ASTNode
+    |   In of uint * uint * ASTNode * Token * ASTNode
+    |   NotIn of uint * uint * ASTNode * Token * Token * ASTNode
+    |   Is of uint * uint * ASTNode * Token * ASTNode
+    |   IsNot of uint * uint * ASTNode * Token * Token * ASTNode
    
 type TokenStream = Token list
 exception SyntaxError of uint * string
@@ -356,3 +383,77 @@ module PythonCoreParser =
                 let right, rest2 = ParseOr rest
                 ASTNode.StarExpr(GetStartPosition(stream), GetStartPosition(rest2), op, right), rest2
         |  _ -> raise (SyntaxError(GetStartPosition(stream), "Expecting '*' in star expression!"))
+        
+    and ParseComparison(stream: TokenStream) : (ASTNode * TokenStream) =
+        let spanStart = GetStartPosition(stream)
+        let mutable left, rest = ParseOr stream
+        while   match TryToken rest with
+                |  Some(Token.PyLess( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        let right, rest3 = ParseOr rest2
+                        left <- ASTNode.Less(spanStart, GetStartPosition(rest3), left, op, right)
+                        rest <- rest3
+                        true
+                |  Some(Token.PyLessEqual( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        let right, rest3 = ParseOr rest2
+                        left <- ASTNode.LessEqual(spanStart, GetStartPosition(rest3), left, op, right)
+                        rest <- rest3
+                        true
+                |  Some(Token.PyEqual( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        let right, rest3 = ParseOr rest2
+                        left <- ASTNode.Equal(spanStart, GetStartPosition(rest3), left, op, right)
+                        rest <- rest3
+                        true
+                |  Some(Token.PyGreaterEqual( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        let right, rest3 = ParseOr rest2
+                        left <- ASTNode.GreaterEqual(spanStart, GetStartPosition(rest3), left, op, right)
+                        rest <- rest3
+                        true
+                |  Some(Token.PyGreater( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        let right, rest3 = ParseOr rest2
+                        left <- ASTNode.Greater(spanStart, GetStartPosition(rest3), left, op, right)
+                        rest <- rest3
+                        true
+                |  Some(Token.PyNotEqual( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        let right, rest3 = ParseOr rest2
+                        left <- ASTNode.NotEqual(spanStart, GetStartPosition(rest3), left, op, right)
+                        rest <- rest3
+                        true
+                |  Some(Token.PyIn( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        let right, rest3 = ParseOr rest2
+                        left <- ASTNode.In(spanStart, GetStartPosition(rest3), left, op, right)
+                        rest <- rest3
+                        true
+                |  Some(Token.PyIs( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        match TryToken rest2 with
+                        |  Some(Token.PyNot( _ , _ , _ ), rest3) ->
+                                let op2 = List.head rest2
+                                let right, rest4 = ParseOr rest3
+                                left <- ASTNode.IsNot(spanStart, GetStartPosition(rest4), left, op, op2, right)
+                                rest <- rest4
+                        |  _ ->
+                               let right, rest3 = ParseOr rest2
+                               left <- ASTNode.Is(spanStart, GetStartPosition(rest3), left, op, right)
+                               rest <- rest3 
+                        true
+                |  Some(Token.PyNot( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        match TryToken rest2 with
+                        |  Some(Token.PyIn( _ , _ , _ ), rest3) ->
+                                let op2 = List.head rest2
+                                let right, rest4 = ParseOr rest3
+                                left <- ASTNode.NotIn(spanStart, GetStartPosition(rest4), left, op, op2, right)
+                                rest <- rest4
+                        |  _ ->
+                                raise ( SyntaxError(GetStartPosition(rest2), "Missing 'in' in 'not in' expression!" ))
+                        true
+                |  _ -> false
+                do ()
+        left, rest
