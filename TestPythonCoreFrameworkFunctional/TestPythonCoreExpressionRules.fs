@@ -869,4 +869,52 @@ module ExpressionsRulesTests =
               ), node)
          
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for empty not test rule``() =
+         let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
+         let node, rest = PythonCoreParser.ParseNotTest stream
+         
+         Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for not test op``() =
+         let stream = [
+              Token.PyNot(0u, 3u, [|  |])
+              Token.Name(4u, 7u, "abc", [|  |])
+              Token.EOF(7u)
+         ]
+         let node, rest = PythonCoreParser.ParseNotTest stream
+         
+         Assert.Equal(
+                   ASTNode.NotTest(
+                         0u, 7u,
+                         Token.PyNot(0u, 3u, [|  |]),
+                         ASTNode.Name(4u, 7u, Token.Name(4u, 7u, "abc", [|  |]) )          
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for not not  test op``() =
+         let stream = [
+              Token.PyNot(0u, 3u, [|  |])
+              Token.PyNot(4u, 7u, [|  |])
+              Token.Name(8u, 11u, "abc", [|  |])
+              Token.EOF(11u)
+         ]
+         let node, rest = PythonCoreParser.ParseNotTest stream
+         
+         Assert.Equal(
+                   ASTNode.NotTest(
+                         0u, 11u,
+                         Token.PyNot(0u, 3u, [|  |]),
+                         ASTNode.NotTest(
+                              4u, 11u,
+                              Token.PyNot(4u, 7u, [|  |]),
+                              ASTNode.Name(8u, 11u, Token.Name(8u, 11u, "abc", [|  |]) ) )
+              ), node)
+         
+         Assert.True(rest.Length = 1)
         

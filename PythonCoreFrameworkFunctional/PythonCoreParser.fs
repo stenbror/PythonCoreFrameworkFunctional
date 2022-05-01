@@ -130,6 +130,7 @@ type ASTNode =
     |   NotIn of uint * uint * ASTNode * Token * Token * ASTNode
     |   Is of uint * uint * ASTNode * Token * ASTNode
     |   IsNot of uint * uint * ASTNode * Token * Token * ASTNode
+    |   NotTest of uint * uint * Token * ASTNode
    
 type TokenStream = Token list
 exception SyntaxError of uint * string
@@ -457,3 +458,12 @@ module PythonCoreParser =
                 |  _ -> false
                 do ()
         left, rest
+        
+    and ParseNotTest(stream: TokenStream) : (ASTNode * TokenStream) =
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        |  Some(Token.PyNot( _ , _ , _ ), rest) ->
+                let op = List.head stream
+                let right, rest2 = ParseNotTest rest
+                ASTNode.NotTest(spanStart, GetStartPosition rest2, op, right), rest2
+        |  _ -> ParseComparison stream
