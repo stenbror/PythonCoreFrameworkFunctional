@@ -85,6 +85,8 @@ type ASTNode =
     |   FloorDiv of uint * uint * ASTNode * Token * ASTNode
     |   Matrice of uint * uint * ASTNode * Token * ASTNode
     |   Modulo of uint * uint * ASTNode * Token * ASTNode
+    |   Plus of uint * uint * ASTNode * Token * ASTNode
+    |   Minus of uint * uint * ASTNode * Token * ASTNode
    
 type TokenStream = Token list
 exception SyntaxError of uint * string
@@ -243,6 +245,26 @@ module PythonCoreParser =
                         let op = List.head rest
                         let right, rest3 = ParseFactor rest2
                         left <- ASTNode.Modulo(spanStart, GetStartPosition(rest3), left, op, right)
+                        rest <- rest3
+                        true
+                |  _ -> false
+                do ()
+        left, rest
+        
+    and ParseArith(stream: TokenStream) : (ASTNode * TokenStream) =
+        let spanStart = GetStartPosition(stream)
+        let mutable left, rest = ParseTerm stream
+        while   match TryToken rest with
+                |  Some(Token.PyPlus( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        let right, rest3 = ParseTerm rest2
+                        left <- ASTNode.Plus(spanStart, GetStartPosition(rest3), left, op, right)
+                        rest <- rest3
+                        true
+                |  Some(Token.PyMinus( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        let right, rest3 = ParseTerm rest2
+                        left <- ASTNode.Minus(spanStart, GetStartPosition(rest3), left, op, right)
                         rest <- rest3
                         true
                 |  _ -> false

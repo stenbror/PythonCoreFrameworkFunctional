@@ -333,3 +333,73 @@ module ExpressionsRulesTests =
               ), node)
          
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for empty arith rule``() =
+         let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
+         let node, rest = PythonCoreParser.ParseArith stream
+         
+         Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for arith rule with plus op``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyPlus(4u, 5u, [|  |])
+              Token.Name(6u, 9u, "abc", [|  |])
+              Token.EOF(9u)
+         ]
+         let node, rest = PythonCoreParser.ParseArith stream
+         
+         Assert.Equal(
+                   ASTNode.Plus(0u, 9u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyPlus(4u, 5u, [|  |]),
+                   ASTNode.Name(6u, 9u, Token.Name(6u, 9u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for arith rule with minus op``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyMinus(4u, 5u, [|  |])
+              Token.Name(6u, 9u, "abc", [|  |])
+              Token.EOF(9u)
+         ]
+         let node, rest = PythonCoreParser.ParseArith stream
+         
+         Assert.Equal(
+                   ASTNode.Minus(0u, 9u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyMinus(4u, 5u, [|  |]),
+                   ASTNode.Name(6u, 9u, Token.Name(6u, 9u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for arith rule with double plus/minus op``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyPlus(4u, 5u, [|  |])
+              Token.Name(6u, 9u, "abc", [|  |])
+              Token.PyMinus(10u, 11u, [|  |])
+              Token.Name(12u, 15u, "abc", [|  |])
+              Token.EOF(15u)
+         ]
+         let node, rest = PythonCoreParser.ParseArith stream
+         
+         Assert.Equal(
+                   ASTNode.Minus(0u, 15u, 
+                        ASTNode.Plus(0u, 10u, 
+                             ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                             Token.PyPlus(4u, 5u, [|  |]),
+                             ASTNode.Name(6u, 9u, Token.Name(6u, 9u, "abc", [|  |]) )),
+                        Token.PyMinus(10u, 11u, [|  |]),
+                        ASTNode.Name(12u, 15u, Token.Name(12u, 15u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
