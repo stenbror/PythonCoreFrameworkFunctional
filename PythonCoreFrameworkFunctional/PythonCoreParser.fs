@@ -1,5 +1,7 @@
 namespace PythonCoreFrameworkFunctional
 
+open System
+
 
 type Trivia =
     |   Empty
@@ -100,6 +102,7 @@ type ASTNode =
     |   BitAnd of uint * uint * ASTNode * Token * ASTNode
     |   BitXor of uint * uint * ASTNode * Token * ASTNode
     |   BitOr of uint * uint * ASTNode * Token * ASTNode
+    |   StarExpr of uint * uint * Token * ASTNode
    
 type TokenStream = Token list
 exception SyntaxError of uint * string
@@ -345,3 +348,11 @@ module PythonCoreParser =
                 |  _ -> false
                 do ()
         left, rest
+        
+    and ParseStarExpr(stream: TokenStream) : (ASTNode * TokenStream) =
+        match TryToken stream with
+        |  Some(Token.PyMul( _ , _ , _ ), rest) ->
+                let op = List.head stream
+                let right, rest2 = ParseOr rest
+                ASTNode.StarExpr(GetStartPosition(stream), GetStartPosition(rest2), op, right), rest2
+        |  _ -> raise (SyntaxError(GetStartPosition(stream), "Expecting '*' in star expression!"))

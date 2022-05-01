@@ -626,3 +626,20 @@ module ExpressionsRulesTests =
               ), node)
          
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for star expression rule``() =
+         let stream = [
+              Token.PyMul(0u, 1u, [|  |])
+              Token.Name(2u, 5u, "abc", [|  |])
+              Token.EOF(5u)
+         ]
+         let node, rest = PythonCoreParser.ParseStarExpr stream
+         
+         Assert.Equal(
+                   ASTNode.StarExpr(0u, 5u, 
+                   Token.PyMul(0u, 1u, [|  |]),
+                   ASTNode.Name(2u, 5u, Token.Name(2u, 5u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
