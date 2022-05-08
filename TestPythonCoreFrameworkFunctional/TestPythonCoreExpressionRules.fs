@@ -1046,3 +1046,34 @@ module ExpressionsRulesTests =
               ), node)
          
          Assert.True(rest.Length = 1)
+
+    [<Fact>]
+    let ``Test Atom Expression rule for test empty``() =
+         let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
+         let node, rest = PythonCoreExpressionParser.ParseTest stream
+         
+         Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for test``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyIf(4u, 6u, [|  |])
+              Token.Name(8u, 11u, "abc", [|  |])
+              Token.PyElse(12u, 16u, [|  |])
+              Token.Name(17u, 20u, "abc", [|  |])
+              Token.EOF(20u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseNamedExpr stream
+         
+         Assert.Equal(
+                   ASTNode.Test(0u, 20u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyIf(4u, 6u, [|  |]),
+                   ASTNode.Name(8u, 11u, Token.Name(8u, 11u, "abc", [|  |])),
+                   Token.PyElse(12u, 16u, [|  |]),
+                   ASTNode.Name(17u, 20u, Token.Name(17u, 20u, "abc", [|  |])
+              )), node)
+         
+         Assert.True(rest.Length = 1)
