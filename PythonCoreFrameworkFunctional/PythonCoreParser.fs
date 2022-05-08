@@ -1,8 +1,5 @@
 namespace PythonCoreFrameworkFunctional
 
-open System
-
-
 type Trivia =
     |   Empty
 
@@ -47,6 +44,7 @@ type Token =
     |   PyIn of uint * uint * Trivia array
     |   PyNot of uint * uint * Trivia array
     |   PyIs of uint * uint * Trivia array
+    |   PyAnd of uint * uint * Trivia array
     static member GetStartPosition(symbol: Token) : uint =
         match symbol with
         |   EOF(s)
@@ -87,7 +85,8 @@ type Token =
         |   PyGreater(s, _ , _ )
         |   PyIn(s, _ , _ )
         |   PyNot(s, _ , _ )
-        |   PyIs(s, _ , _ ) -> s
+        |   PyIs(s, _ , _ )
+        |   PyAnd(s, _ , _ ) -> s
         |   _   ->  0u
     
 type ASTNode =
@@ -131,6 +130,7 @@ type ASTNode =
     |   Is of uint * uint * ASTNode * Token * ASTNode
     |   IsNot of uint * uint * ASTNode * Token * Token * ASTNode
     |   NotTest of uint * uint * Token * ASTNode
+    |   AndTest of uint * uint * ASTNode * Token * ASTNode
    
 type TokenStream = Token list
 exception SyntaxError of uint * string
@@ -467,3 +467,17 @@ module PythonCoreParser =
                 let right, rest2 = ParseNotTest rest
                 ASTNode.NotTest(spanStart, GetStartPosition rest2, op, right), rest2
         |  _ -> ParseComparison stream
+        
+    and ParseAndTest(stream: TokenStream) : (ASTNode * TokenStream) =
+        let spanStart = GetStartPosition stream
+        let mutable left, rest = ParseNotTest stream
+        while   match TryToken rest with
+                |  Some(Token.PyAnd( _ , _ , _ ), rest2) ->
+                        let op = List.head rest
+                        let right, rest3 = ParseNotTest rest2
+                        left <- ASTNode.AndTest(spanStart, GetStartPosition(rest3), left, op, right)
+                        rest <- rest3
+                        true
+                | _ -> false
+                do ()
+        left, rest

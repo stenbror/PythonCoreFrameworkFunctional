@@ -917,4 +917,54 @@ module ExpressionsRulesTests =
               ), node)
          
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for empty and test``() =
+         let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
+         let node, rest = PythonCoreParser.ParseAndTest stream
+         
+         Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
+         Assert.True(rest.Length = 1)
         
+    [<Fact>]
+    let ``Test Atom Expression rule for and test``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyAnd(4u, 7u, [|  |])
+              Token.Name(8u, 11u, "abc", [|  |])
+              Token.EOF(11u)
+         ]
+         let node, rest = PythonCoreParser.ParseAndTest stream
+         
+         Assert.Equal(
+                   ASTNode.AndTest(0u, 11u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyAnd(4u, 7u, [|  |]),
+                   ASTNode.Name(8u, 11u, Token.Name(8u, 11u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for multiple and test``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyAnd(4u, 7u, [|  |])
+              Token.Name(8u, 11u, "abc", [|  |])
+              Token.PyAnd(12u, 15u, [|  |])
+              Token.Name(16u, 19u, "abc", [|  |])
+              Token.EOF(19u)
+         ]
+         let node, rest = PythonCoreParser.ParseAndTest stream
+         
+         Assert.Equal(
+                   ASTNode.AndTest(0u, 19u, 
+                        ASTNode.AndTest(0u, 12u, 
+                             ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                             Token.PyAnd(4u, 7u, [|  |]),
+                             ASTNode.Name(8u, 11u, Token.Name(8u, 11u, "abc", [|  |]) )),
+                        Token.PyAnd(12u, 15u, [|  |]),
+                        ASTNode.Name(16u, 19u, Token.Name(16u, 19u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
