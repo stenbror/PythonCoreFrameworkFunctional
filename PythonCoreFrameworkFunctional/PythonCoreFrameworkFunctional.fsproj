@@ -6,7 +6,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="PythonCoreParser.fs" />
+        <Compile Include="PythonCoreTokenizer.fs" />
+        <Compile Include="ASTNode.fs" />
+        <Compile Include="PythonCoreExpressionParser.fs" />
     </ItemGroup>
 
 </Project>

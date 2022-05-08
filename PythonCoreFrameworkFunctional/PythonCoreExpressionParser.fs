@@ -1,145 +1,10 @@
 namespace PythonCoreFrameworkFunctional
 
-type Trivia =
-    |   Empty
-
-type Token =
-    |   Empty
-    |   EOF of uint
-    |   PyFalse of uint * uint * Trivia array
-    |   PyNone of uint * uint * Trivia array
-    |   PyTrue of uint * uint * Trivia array
-    |   PyEllipsis of uint * uint * Trivia array
-    |   Name of uint * uint * string * Trivia array
-    |   Number of uint * uint * string * Trivia array
-    |   String of uint * uint * string * Trivia array
-    |   PyLeftParen of uint * uint * Trivia array
-    |   PyLeftBracket of uint * uint * Trivia array
-    |   PyLeftCurly of uint * uint * Trivia array
-    |   PyRightParen of uint * uint * Trivia array
-    |   PyRightBracket of uint * uint * Trivia array
-    |   PyRightCurly of uint * uint * Trivia array
-    |   PyAwait of uint * uint * Trivia array
-    |   PyDot of uint * uint * Trivia array
-    |   PyPower of uint * uint * Trivia array
-    |   PyPlus of uint * uint * Trivia array
-    |   PyMinus of uint * uint * Trivia array
-    |   PyBitInvert of uint * uint * Trivia array
-    |   PyMul of uint * uint * Trivia array
-    |   PyDiv of uint * uint * Trivia array
-    |   PyFloorDiv of uint * uint * Trivia array
-    |   PyMatrice of uint * uint * Trivia array
-    |   PyModulo of uint * uint * Trivia array
-    |   PyShiftLeft of uint * uint * Trivia array
-    |   PyShiftRight of uint * uint * Trivia array
-    |   PyBitAnd of uint * uint * Trivia array
-    |   PyBitXor of uint * uint * Trivia array
-    |   PyBitOr of uint * uint * Trivia array
-    |   PyLess of uint * uint * Trivia array
-    |   PyLessEqual of uint * uint * Trivia array
-    |   PyEqual of uint * uint * Trivia array
-    |   PyGreaterEqual of uint * uint * Trivia array
-    |   PyGreater of uint * uint * Trivia array
-    |   PyNotEqual of uint * uint * Trivia array
-    |   PyIn of uint * uint * Trivia array
-    |   PyNot of uint * uint * Trivia array
-    |   PyIs of uint * uint * Trivia array
-    |   PyAnd of uint * uint * Trivia array
-    |   PyOr of uint * uint * Trivia array
-    static member GetStartPosition(symbol: Token) : uint =
-        match symbol with
-        |   EOF(s)
-        |   PyFalse(s, _ , _ )
-        |   PyNone(s, _ , _ )
-        |   PyTrue(s, _ , _ )
-        |   PyEllipsis(s, _ , _)
-        |   Name(s, _, _, _ )
-        |   Number(s, _ , _ , _ )
-        |   String(s, _ , _ , _ )
-        |   PyLeftParen(s , _ , _ )
-        |   PyLeftBracket(s, _ , _ )
-        |   PyLeftCurly(s, _ , _ )
-        |   PyLeftCurly(s, _ , _ )
-        |   PyRightParen(s, _ , _ )
-        |   PyRightBracket(s, _ , _ )
-        |   PyRightCurly(s, _ , _ )
-        |   PyAwait(s, _ , _ )
-        |   PyDot(s, _ , _ )
-        |   PyPower(s, _ , _ )
-        |   PyPlus(s, _ , _ )
-        |   PyMinus(s, _ , _)
-        |   PyBitInvert(s, _ , _ )
-        |   PyMul(s, _ , _ )
-        |   PyDiv(s, _ , _ )
-        |   PyFloorDiv(s, _ , _ )
-        |   PyMatrice(s, _ , _ )
-        |   PyModulo(s, _ , _ )
-        |   PyShiftLeft(s, _ , _ )
-        |   PyShiftRight(s, _ , _ )
-        |   PyBitAnd(s, _ , _ )
-        |   PyBitXor(s, _ , _ )
-        |   PyBitOr(s, _ , _ )
-        |   PyLess(s, _ , _ )
-        |   PyLessEqual(s, _ , _ )
-        |   PyEqual(s, _ , _ )
-        |   PyGreaterEqual(s, _ , _ )
-        |   PyGreater(s, _ , _ )
-        |   PyIn(s, _ , _ )
-        |   PyNot(s, _ , _ )
-        |   PyIs(s, _ , _ )
-        |   PyAnd(s, _ , _ )
-        |   PyOr(s, _ , _ ) -> s
-        |   _   ->  0u
-    
-type ASTNode =
-    |   Empty
-    |   False of uint * uint * Token
-    |   None of uint * uint * Token
-    |   True of uint * uint * Token
-    |   Ellipsis of uint * uint * Token
-    |   Name of uint * uint * Token
-    |   Number of uint * uint * Token
-    |   String of uint * uint * Token array
-    |   Tuple of uint * uint * Token * ASTNode * Token
-    |   List of uint * uint * Token * ASTNode * Token
-    |   Dictionary of uint * uint * Token * ASTNode * Token
-    |   AtomExpr of uint * uint * Token * ASTNode * ASTNode array
-    |   Power of uint * uint * ASTNode * Token * ASTNode
-    |   UnaryPlus of uint * uint * Token * ASTNode
-    |   UnaryMinus of uint * uint * Token * ASTNode
-    |   UnaryBitInvert of uint * uint * Token * ASTNode
-    |   Mul of uint * uint * ASTNode * Token * ASTNode
-    |   Div of uint * uint * ASTNode * Token * ASTNode
-    |   FloorDiv of uint * uint * ASTNode * Token * ASTNode
-    |   Matrice of uint * uint * ASTNode * Token * ASTNode
-    |   Modulo of uint * uint * ASTNode * Token * ASTNode
-    |   Plus of uint * uint * ASTNode * Token * ASTNode
-    |   Minus of uint * uint * ASTNode * Token * ASTNode
-    |   ShiftLeft of uint * uint * ASTNode * Token * ASTNode
-    |   ShiftRight of uint * uint * ASTNode * Token * ASTNode
-    |   BitAnd of uint * uint * ASTNode * Token * ASTNode
-    |   BitXor of uint * uint * ASTNode * Token * ASTNode
-    |   BitOr of uint * uint * ASTNode * Token * ASTNode
-    |   StarExpr of uint * uint * Token * ASTNode
-    |   Less of uint * uint * ASTNode * Token * ASTNode
-    |   LessEqual of uint * uint * ASTNode * Token * ASTNode
-    |   Equal of uint * uint * ASTNode * Token * ASTNode
-    |   GreaterEqual of uint * uint * ASTNode * Token * ASTNode
-    |   Greater of uint * uint * ASTNode * Token * ASTNode
-    |   NotEqual of uint * uint * ASTNode * Token * ASTNode
-    |   In of uint * uint * ASTNode * Token * ASTNode
-    |   NotIn of uint * uint * ASTNode * Token * Token * ASTNode
-    |   Is of uint * uint * ASTNode * Token * ASTNode
-    |   IsNot of uint * uint * ASTNode * Token * Token * ASTNode
-    |   NotTest of uint * uint * Token * ASTNode
-    |   AndTest of uint * uint * ASTNode * Token * ASTNode
-    |   OrTest of uint * uint * ASTNode * Token * ASTNode
    
-type TokenStream = Token list
 exception SyntaxError of uint * string
 
-// Python parser //////////////////////////////////////////////////////////////////////////////////////////////////////
-module PythonCoreParser =
+
+module PythonCoreExpressionParser =
     
     let TryToken (stream: TokenStream) : (Token * TokenStream) option =
         match stream with
@@ -498,3 +363,20 @@ module PythonCoreParser =
                 | _ -> false
                 do ()
         left, rest
+        
+    and ParseLambda(stream: TokenStream, isCond: bool) : (ASTNode * TokenStream) =
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        | _ ->  raise (SyntaxError(GetStartPosition stream, "Expecting 'lambda' expression!"))
+        
+    and ParseVarArgsList(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
+        
+    and ParseTestNoCOnd(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
+        
+    and ParseTest(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
+        
+    and ParseNamedExpr(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream

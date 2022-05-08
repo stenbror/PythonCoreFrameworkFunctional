@@ -11,7 +11,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for False token``() =
          let stream = [ Token.PyFalse(0u, 5u, [|  |]); ]
-         let node, rest = PythonCoreParser.ParseAtom stream
+         let node, rest = PythonCoreExpressionParser.ParseAtom stream
          
          Assert.Equal(ASTNode.False(0u, 5u, Token.PyFalse(0u, 5u, [|  |])), node)
          Assert.True(rest.Length = 0)
@@ -19,7 +19,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for None token``() =
          let stream = [ Token.PyNone(0u, 4u, [|  |]); ]
-         let node, rest = PythonCoreParser.ParseAtom stream
+         let node, rest = PythonCoreExpressionParser.ParseAtom stream
          
          Assert.Equal(ASTNode.None(0u, 4u, Token.PyNone(0u, 4u, [|  |])), node)
          Assert.True(rest.Length = 0)
@@ -27,7 +27,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for True token``() =
          let stream = [ Token.PyTrue(0u, 4u, [|  |]); ]
-         let node, rest = PythonCoreParser.ParseAtom stream
+         let node, rest = PythonCoreExpressionParser.ParseAtom stream
          
          Assert.Equal(ASTNode.True(0u, 4u, Token.PyTrue(0u, 4u, [|  |])), node)
          Assert.True(rest.Length = 0)
@@ -35,7 +35,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for ... token``() =
          let stream = [ Token.PyEllipsis(0u, 3u, [|  |]); ]
-         let node, rest = PythonCoreParser.ParseAtom stream
+         let node, rest = PythonCoreExpressionParser.ParseAtom stream
          
          Assert.Equal(ASTNode.Ellipsis(0u, 3u, Token.PyEllipsis(0u, 3u, [|  |])), node)
          Assert.True(rest.Length = 0)
@@ -43,7 +43,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for name token``() =
          let stream = [ Token.Name(0u, 3u, "abc", [|  |]); ]
-         let node, rest = PythonCoreParser.ParseAtom stream
+         let node, rest = PythonCoreExpressionParser.ParseAtom stream
          
          Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
          Assert.True(rest.Length = 0)
@@ -51,7 +51,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for number token``() =
          let stream = [ Token.Name(0u, 4u, "1.34", [|  |]); ]
-         let node, rest = PythonCoreParser.ParseAtom stream
+         let node, rest = PythonCoreExpressionParser.ParseAtom stream
          
          Assert.Equal(ASTNode.Name(0u, 4u, Token.Name(0u, 4u, "1.34", [|  |])), node)
          Assert.True(rest.Length = 0)
@@ -59,7 +59,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for single string token``() =
          let stream = [ Token.String(0u, 14u, "'Hello, World!'", [|  |]); Token.EOF(14u) ]
-         let node, rest = PythonCoreParser.ParseAtom stream
+         let node, rest = PythonCoreExpressionParser.ParseAtom stream
          
          Assert.Equal(ASTNode.String(0u, 14u, [| Token.String(0u, 14u, "'Hello, World!'", [|  |]) |] ), node)
          Assert.True(rest.Length = 1)
@@ -71,7 +71,7 @@ module ExpressionsRulesTests =
               Token.String(14u, 25u, "'bye, bye!'", [|  |])
               Token.EOF(25u)
          ]
-         let node, rest = PythonCoreParser.ParseAtom stream
+         let node, rest = PythonCoreExpressionParser.ParseAtom stream
          
          Assert.Equal(ASTNode.String(0u, 25u, [|
               Token.String(0u, 14u, "'Hello, World!'", [|  |])
@@ -82,7 +82,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for empty tuple``() =
          let stream = [ Token.PyLeftParen(0u, 1u, [|  |]); Token.PyRightParen(1u, 2u, [|  |]); Token.EOF(2u) ]
-         let node, rest = PythonCoreParser.ParseAtom stream
+         let node, rest = PythonCoreExpressionParser.ParseAtom stream
          
          Assert.Equal(ASTNode.Tuple(0u, 2u, Token.PyLeftParen(0u, 1u, [||]), ASTNode.Empty, Token.PyRightParen(1u, 2u, [|  |]) ), node)
          Assert.True(rest.Length = 1)
@@ -90,7 +90,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for empty list``() =
          let stream = [ Token.PyLeftBracket(0u, 1u, [|  |]); Token.PyRightBracket(1u, 2u, [|  |]); Token.EOF(2u) ]
-         let node, rest = PythonCoreParser.ParseAtom stream
+         let node, rest = PythonCoreExpressionParser.ParseAtom stream
          
          Assert.Equal(ASTNode.List(0u, 2u, Token.PyLeftBracket(0u, 1u, [||]), ASTNode.Empty, Token.PyRightBracket(1u, 2u, [|  |]) ), node)
          Assert.True(rest.Length = 1)
@@ -98,7 +98,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for empty dictionary``() =
          let stream = [ Token.PyLeftCurly(0u, 1u, [|  |]); Token.PyRightCurly(1u, 2u, [|  |]); Token.EOF(2u) ]
-         let node, rest = PythonCoreParser.ParseAtom stream
+         let node, rest = PythonCoreExpressionParser.ParseAtom stream
          
          Assert.Equal(ASTNode.Dictionary(0u, 2u, Token.PyLeftCurly(0u, 1u, [||]), ASTNode.Empty, Token.PyRightCurly(1u, 2u, [|  |]) ), node)
          Assert.True(rest.Length = 1)
@@ -106,7 +106,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for atom expr with no additional items``() =
          let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
-         let node, rest = PythonCoreParser.ParseAtomExpr stream
+         let node, rest = PythonCoreExpressionParser.ParseAtomExpr stream
          
          Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
          Assert.True(rest.Length = 1)
@@ -114,7 +114,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for atom expr with await``() =
          let stream = [ Token.PyAwait(0u, 5u, [|  |]); Token.Name(6u, 9u, "abc", [|  |]); Token.EOF(9u) ]
-         let node, rest = PythonCoreParser.ParseAtomExpr stream
+         let node, rest = PythonCoreExpressionParser.ParseAtomExpr stream
          
          Assert.Equal(ASTNode.AtomExpr(0u, 9u, Token.PyAwait(0u, 5u, [||]), ASTNode.Name(6u, 9u,
                                         Token.Name(6u, 9u, "abc", [|  |])), [||])
@@ -124,7 +124,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for empty power rule``() =
          let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
-         let node, rest = PythonCoreParser.ParsePower stream
+         let node, rest = PythonCoreExpressionParser.ParsePower stream
          
          Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
          Assert.True(rest.Length = 1)
@@ -137,7 +137,7 @@ module ExpressionsRulesTests =
               Token.Name(6u, 9u, "abc", [|  |])
               Token.EOF(9u)
          ]
-         let node, rest = PythonCoreParser.ParsePower stream
+         let node, rest = PythonCoreExpressionParser.ParsePower stream
          
          Assert.Equal(
                    ASTNode.Power(0u, 9u, 
@@ -151,7 +151,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for empty factor rule``() =
          let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
-         let node, rest = PythonCoreParser.ParseFactor stream
+         let node, rest = PythonCoreExpressionParser.ParseFactor stream
          
          Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
          Assert.True(rest.Length = 1)
@@ -163,7 +163,7 @@ module ExpressionsRulesTests =
               Token.Name(2u, 5u, "abc", [|  |])
               Token.EOF(5u)
          ]
-         let node, rest = PythonCoreParser.ParseFactor stream
+         let node, rest = PythonCoreExpressionParser.ParseFactor stream
          
          Assert.Equal(
                    ASTNode.UnaryPlus(0u, 5u, 
@@ -180,7 +180,7 @@ module ExpressionsRulesTests =
               Token.Name(2u, 5u, "abc", [|  |])
               Token.EOF(5u)
          ]
-         let node, rest = PythonCoreParser.ParseFactor stream
+         let node, rest = PythonCoreExpressionParser.ParseFactor stream
          
          Assert.Equal(
                    ASTNode.UnaryMinus(0u, 5u, 
@@ -197,7 +197,7 @@ module ExpressionsRulesTests =
               Token.Name(2u, 5u, "abc", [|  |])
               Token.EOF(5u)
          ]
-         let node, rest = PythonCoreParser.ParseFactor stream
+         let node, rest = PythonCoreExpressionParser.ParseFactor stream
          
          Assert.Equal(
                    ASTNode.UnaryBitInvert(0u, 5u, 
@@ -210,7 +210,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for empty term rule``() =
          let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
-         let node, rest = PythonCoreParser.ParseTerm stream
+         let node, rest = PythonCoreExpressionParser.ParseTerm stream
          
          Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
          Assert.True(rest.Length = 1)
@@ -223,7 +223,7 @@ module ExpressionsRulesTests =
               Token.Name(6u, 9u, "abc", [|  |])
               Token.EOF(9u)
          ]
-         let node, rest = PythonCoreParser.ParseTerm stream
+         let node, rest = PythonCoreExpressionParser.ParseTerm stream
          
          Assert.Equal(
                    ASTNode.Mul(0u, 9u, 
@@ -242,7 +242,7 @@ module ExpressionsRulesTests =
               Token.Name(6u, 9u, "abc", [|  |])
               Token.EOF(9u)
          ]
-         let node, rest = PythonCoreParser.ParseTerm stream
+         let node, rest = PythonCoreExpressionParser.ParseTerm stream
          
          Assert.Equal(
                    ASTNode.Div(0u, 9u, 
@@ -261,7 +261,7 @@ module ExpressionsRulesTests =
               Token.Name(6u, 9u, "abc", [|  |])
               Token.EOF(9u)
          ]
-         let node, rest = PythonCoreParser.ParseTerm stream
+         let node, rest = PythonCoreExpressionParser.ParseTerm stream
          
          Assert.Equal(
                    ASTNode.Matrice(0u, 9u, 
@@ -280,7 +280,7 @@ module ExpressionsRulesTests =
               Token.Name(6u, 9u, "abc", [|  |])
               Token.EOF(9u)
          ]
-         let node, rest = PythonCoreParser.ParseTerm stream
+         let node, rest = PythonCoreExpressionParser.ParseTerm stream
          
          Assert.Equal(
                    ASTNode.Modulo(0u, 9u, 
@@ -299,7 +299,7 @@ module ExpressionsRulesTests =
               Token.Name(7u, 10u, "abc", [|  |])
               Token.EOF(10u)
          ]
-         let node, rest = PythonCoreParser.ParseTerm stream
+         let node, rest = PythonCoreExpressionParser.ParseTerm stream
          
          Assert.Equal(
                    ASTNode.FloorDiv(0u, 10u, 
@@ -320,7 +320,7 @@ module ExpressionsRulesTests =
               Token.Name(12u, 15u, "abc", [|  |])
               Token.EOF(15u)
          ]
-         let node, rest = PythonCoreParser.ParseTerm stream
+         let node, rest = PythonCoreExpressionParser.ParseTerm stream
          
          Assert.Equal(
                    ASTNode.Modulo(0u, 15u, 
@@ -337,7 +337,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for empty arith rule``() =
          let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
-         let node, rest = PythonCoreParser.ParseArith stream
+         let node, rest = PythonCoreExpressionParser.ParseArith stream
          
          Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
          Assert.True(rest.Length = 1)
@@ -350,7 +350,7 @@ module ExpressionsRulesTests =
               Token.Name(6u, 9u, "abc", [|  |])
               Token.EOF(9u)
          ]
-         let node, rest = PythonCoreParser.ParseArith stream
+         let node, rest = PythonCoreExpressionParser.ParseArith stream
          
          Assert.Equal(
                    ASTNode.Plus(0u, 9u, 
@@ -369,7 +369,7 @@ module ExpressionsRulesTests =
               Token.Name(6u, 9u, "abc", [|  |])
               Token.EOF(9u)
          ]
-         let node, rest = PythonCoreParser.ParseArith stream
+         let node, rest = PythonCoreExpressionParser.ParseArith stream
          
          Assert.Equal(
                    ASTNode.Minus(0u, 9u, 
@@ -390,7 +390,7 @@ module ExpressionsRulesTests =
               Token.Name(12u, 15u, "abc", [|  |])
               Token.EOF(15u)
          ]
-         let node, rest = PythonCoreParser.ParseArith stream
+         let node, rest = PythonCoreExpressionParser.ParseArith stream
          
          Assert.Equal(
                    ASTNode.Minus(0u, 15u, 
@@ -407,7 +407,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for empty shift rule``() =
          let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
-         let node, rest = PythonCoreParser.ParseShift stream
+         let node, rest = PythonCoreExpressionParser.ParseShift stream
          
          Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
          Assert.True(rest.Length = 1)    
@@ -420,7 +420,7 @@ module ExpressionsRulesTests =
               Token.Name(6u, 9u, "abc", [|  |])
               Token.EOF(9u)
          ]
-         let node, rest = PythonCoreParser.ParseShift stream
+         let node, rest = PythonCoreExpressionParser.ParseShift stream
          
          Assert.Equal(
                    ASTNode.ShiftLeft(0u, 9u, 
@@ -439,7 +439,7 @@ module ExpressionsRulesTests =
               Token.Name(6u, 9u, "abc", [|  |])
               Token.EOF(9u)
          ]
-         let node, rest = PythonCoreParser.ParseShift stream
+         let node, rest = PythonCoreExpressionParser.ParseShift stream
          
          Assert.Equal(
                    ASTNode.ShiftRight(0u, 9u, 
@@ -460,7 +460,7 @@ module ExpressionsRulesTests =
               Token.Name(12u, 15u, "abc", [|  |])
               Token.EOF(15u)
          ]
-         let node, rest = PythonCoreParser.ParseShift stream
+         let node, rest = PythonCoreExpressionParser.ParseShift stream
          
          Assert.Equal(
                    ASTNode.ShiftRight(0u, 15u, 
@@ -477,7 +477,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for empty bit and rule``() =
          let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
-         let node, rest = PythonCoreParser.ParseAnd stream
+         let node, rest = PythonCoreExpressionParser.ParseAnd stream
          
          Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
          Assert.True(rest.Length = 1)
@@ -490,7 +490,7 @@ module ExpressionsRulesTests =
               Token.Name(8u, 11u, "abc", [|  |])
               Token.EOF(11u)
          ]
-         let node, rest = PythonCoreParser.ParseAnd stream
+         let node, rest = PythonCoreExpressionParser.ParseAnd stream
          
          Assert.Equal(
                    ASTNode.BitAnd(0u, 11u, 
@@ -511,7 +511,7 @@ module ExpressionsRulesTests =
               Token.Name(16u, 19u, "abc", [|  |])
               Token.EOF(19u)
          ]
-         let node, rest = PythonCoreParser.ParseAnd stream
+         let node, rest = PythonCoreExpressionParser.ParseAnd stream
          
          Assert.Equal(
                    ASTNode.BitAnd(0u, 19u, 
@@ -528,7 +528,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for empty bit xor rule``() =
          let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
-         let node, rest = PythonCoreParser.ParseXor stream
+         let node, rest = PythonCoreExpressionParser.ParseXor stream
          
          Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
          Assert.True(rest.Length = 1)
@@ -541,7 +541,7 @@ module ExpressionsRulesTests =
               Token.Name(8u, 11u, "abc", [|  |])
               Token.EOF(11u)
          ]
-         let node, rest = PythonCoreParser.ParseXor stream
+         let node, rest = PythonCoreExpressionParser.ParseXor stream
          
          Assert.Equal(
                    ASTNode.BitXor(0u, 11u, 
@@ -562,7 +562,7 @@ module ExpressionsRulesTests =
               Token.Name(16u, 19u, "abc", [|  |])
               Token.EOF(19u)
          ]
-         let node, rest = PythonCoreParser.ParseXor stream
+         let node, rest = PythonCoreExpressionParser.ParseXor stream
          
          Assert.Equal(
                    ASTNode.BitXor(0u, 19u, 
@@ -579,7 +579,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for empty bit or rule``() =
          let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
-         let node, rest = PythonCoreParser.ParseOr stream
+         let node, rest = PythonCoreExpressionParser.ParseOr stream
          
          Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
          Assert.True(rest.Length = 1)
@@ -592,7 +592,7 @@ module ExpressionsRulesTests =
               Token.Name(8u, 11u, "abc", [|  |])
               Token.EOF(11u)
          ]
-         let node, rest = PythonCoreParser.ParseOr stream
+         let node, rest = PythonCoreExpressionParser.ParseOr stream
          
          Assert.Equal(
                    ASTNode.BitOr(0u, 11u, 
@@ -613,7 +613,7 @@ module ExpressionsRulesTests =
               Token.Name(16u, 19u, "abc", [|  |])
               Token.EOF(19u)
          ]
-         let node, rest = PythonCoreParser.ParseOr stream
+         let node, rest = PythonCoreExpressionParser.ParseOr stream
          
          Assert.Equal(
                    ASTNode.BitOr(0u, 19u, 
@@ -634,7 +634,7 @@ module ExpressionsRulesTests =
               Token.Name(2u, 5u, "abc", [|  |])
               Token.EOF(5u)
          ]
-         let node, rest = PythonCoreParser.ParseStarExpr stream
+         let node, rest = PythonCoreExpressionParser.ParseStarExpr stream
          
          Assert.Equal(
                    ASTNode.StarExpr(0u, 5u, 
@@ -647,7 +647,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for empty comparison rule``() =
          let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
-         let node, rest = PythonCoreParser.ParseComparison stream
+         let node, rest = PythonCoreExpressionParser.ParseComparison stream
          
          Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
          Assert.True(rest.Length = 1)
@@ -660,7 +660,7 @@ module ExpressionsRulesTests =
               Token.Name(7u, 10u, "abc", [|  |])
               Token.EOF(10u)
          ]
-         let node, rest = PythonCoreParser.ParseComparison stream
+         let node, rest = PythonCoreExpressionParser.ParseComparison stream
          
          Assert.Equal(
                    ASTNode.Less(0u, 10u, 
@@ -679,7 +679,7 @@ module ExpressionsRulesTests =
               Token.Name(7u, 10u, "abc", [|  |])
               Token.EOF(10u)
          ]
-         let node, rest = PythonCoreParser.ParseComparison stream
+         let node, rest = PythonCoreExpressionParser.ParseComparison stream
          
          Assert.Equal(
                    ASTNode.LessEqual(0u, 10u, 
@@ -698,7 +698,7 @@ module ExpressionsRulesTests =
               Token.Name(7u, 10u, "abc", [|  |])
               Token.EOF(10u)
          ]
-         let node, rest = PythonCoreParser.ParseComparison stream
+         let node, rest = PythonCoreExpressionParser.ParseComparison stream
          
          Assert.Equal(
                    ASTNode.Equal(0u, 10u, 
@@ -717,7 +717,7 @@ module ExpressionsRulesTests =
               Token.Name(7u, 10u, "abc", [|  |])
               Token.EOF(10u)
          ]
-         let node, rest = PythonCoreParser.ParseComparison stream
+         let node, rest = PythonCoreExpressionParser.ParseComparison stream
          
          Assert.Equal(
                    ASTNode.GreaterEqual(0u, 10u, 
@@ -736,7 +736,7 @@ module ExpressionsRulesTests =
               Token.Name(7u, 10u, "abc", [|  |])
               Token.EOF(10u)
          ]
-         let node, rest = PythonCoreParser.ParseComparison stream
+         let node, rest = PythonCoreExpressionParser.ParseComparison stream
          
          Assert.Equal(
                    ASTNode.Greater(0u, 10u, 
@@ -755,7 +755,7 @@ module ExpressionsRulesTests =
               Token.Name(7u, 10u, "abc", [|  |])
               Token.EOF(10u)
          ]
-         let node, rest = PythonCoreParser.ParseComparison stream
+         let node, rest = PythonCoreExpressionParser.ParseComparison stream
          
          Assert.Equal(
                    ASTNode.NotEqual(0u, 10u, 
@@ -774,7 +774,7 @@ module ExpressionsRulesTests =
               Token.Name(7u, 10u, "abc", [|  |])
               Token.EOF(10u)
          ]
-         let node, rest = PythonCoreParser.ParseComparison stream
+         let node, rest = PythonCoreExpressionParser.ParseComparison stream
          
          Assert.Equal(
                    ASTNode.In(0u, 10u, 
@@ -793,7 +793,7 @@ module ExpressionsRulesTests =
               Token.Name(7u, 10u, "abc", [|  |])
               Token.EOF(10u)
          ]
-         let node, rest = PythonCoreParser.ParseComparison stream
+         let node, rest = PythonCoreExpressionParser.ParseComparison stream
          
          Assert.Equal(
                    ASTNode.Is(0u, 10u, 
@@ -813,7 +813,7 @@ module ExpressionsRulesTests =
               Token.Name(11u, 14u, "abc", [|  |])
               Token.EOF(14u)
          ]
-         let node, rest = PythonCoreParser.ParseComparison stream
+         let node, rest = PythonCoreExpressionParser.ParseComparison stream
          
          Assert.Equal(
                    ASTNode.NotIn(0u, 14u, 
@@ -834,7 +834,7 @@ module ExpressionsRulesTests =
               Token.Name(11u, 14u, "abc", [|  |])
               Token.EOF(14u)
          ]
-         let node, rest = PythonCoreParser.ParseComparison stream
+         let node, rest = PythonCoreExpressionParser.ParseComparison stream
          
          Assert.Equal(
                    ASTNode.IsNot(0u, 14u, 
@@ -856,7 +856,7 @@ module ExpressionsRulesTests =
               Token.Name(16u, 19u, "abc", [|  |])
               Token.EOF(19u)
          ]
-         let node, rest = PythonCoreParser.ParseComparison stream
+         let node, rest = PythonCoreExpressionParser.ParseComparison stream
          
          Assert.Equal(
                    ASTNode.LessEqual(0u, 19u, 
@@ -873,7 +873,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for empty not test rule``() =
          let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
-         let node, rest = PythonCoreParser.ParseNotTest stream
+         let node, rest = PythonCoreExpressionParser.ParseNotTest stream
          
          Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
          Assert.True(rest.Length = 1)
@@ -885,7 +885,7 @@ module ExpressionsRulesTests =
               Token.Name(4u, 7u, "abc", [|  |])
               Token.EOF(7u)
          ]
-         let node, rest = PythonCoreParser.ParseNotTest stream
+         let node, rest = PythonCoreExpressionParser.ParseNotTest stream
          
          Assert.Equal(
                    ASTNode.NotTest(
@@ -904,7 +904,7 @@ module ExpressionsRulesTests =
               Token.Name(8u, 11u, "abc", [|  |])
               Token.EOF(11u)
          ]
-         let node, rest = PythonCoreParser.ParseNotTest stream
+         let node, rest = PythonCoreExpressionParser.ParseNotTest stream
          
          Assert.Equal(
                    ASTNode.NotTest(
@@ -921,7 +921,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for empty and test``() =
          let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
-         let node, rest = PythonCoreParser.ParseAndTest stream
+         let node, rest = PythonCoreExpressionParser.ParseAndTest stream
          
          Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
          Assert.True(rest.Length = 1)
@@ -934,7 +934,7 @@ module ExpressionsRulesTests =
               Token.Name(8u, 11u, "abc", [|  |])
               Token.EOF(11u)
          ]
-         let node, rest = PythonCoreParser.ParseAndTest stream
+         let node, rest = PythonCoreExpressionParser.ParseAndTest stream
          
          Assert.Equal(
                    ASTNode.AndTest(0u, 11u, 
@@ -955,7 +955,7 @@ module ExpressionsRulesTests =
               Token.Name(16u, 19u, "abc", [|  |])
               Token.EOF(19u)
          ]
-         let node, rest = PythonCoreParser.ParseAndTest stream
+         let node, rest = PythonCoreExpressionParser.ParseAndTest stream
          
          Assert.Equal(
                    ASTNode.AndTest(0u, 19u, 
@@ -972,7 +972,7 @@ module ExpressionsRulesTests =
     [<Fact>]
     let ``Test Atom Expression rule for empty or test``() =
          let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
-         let node, rest = PythonCoreParser.ParseOrTest stream
+         let node, rest = PythonCoreExpressionParser.ParseOrTest stream
          
          Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
          Assert.True(rest.Length = 1)
@@ -985,7 +985,7 @@ module ExpressionsRulesTests =
               Token.Name(8u, 11u, "abc", [|  |])
               Token.EOF(11u)
          ]
-         let node, rest = PythonCoreParser.ParseOrTest stream
+         let node, rest = PythonCoreExpressionParser.ParseOrTest stream
          
          Assert.Equal(
                    ASTNode.OrTest(0u, 11u, 
@@ -1006,7 +1006,7 @@ module ExpressionsRulesTests =
               Token.Name(16u, 19u, "abc", [|  |])
               Token.EOF(19u)
          ]
-         let node, rest = PythonCoreParser.ParseOrTest stream
+         let node, rest = PythonCoreExpressionParser.ParseOrTest stream
          
          Assert.Equal(
                    ASTNode.OrTest(0u, 19u, 
