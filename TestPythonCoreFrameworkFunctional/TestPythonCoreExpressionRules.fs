@@ -1115,3 +1115,24 @@ module ExpressionsRulesTests =
          
          Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for no conditional lambda``() =
+         let stream = [
+              Token.PyLambda(0u, 6u, [|  |])
+              Token.PyColon(6u, 7u, [|  |])
+              Token.Name(8u, 11u, "abc", [|  |])
+              Token.EOF(11u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseTestNoCond stream
+         
+         Assert.Equal(
+                   ASTNode.Lambda(
+                                  0u, 11u,
+                                  Token.PyLambda(0u, 6u, [|  |]),
+                                  ASTNode.Empty,
+                                  Token.PyColon(6u, 7u, [|  |]),
+                                  ASTNode.Name(8u, 11u, Token.Name(8u, 11u, "abc", [|  |])) )
+              , node)
+         
+         Assert.True(rest.Length = 1)
