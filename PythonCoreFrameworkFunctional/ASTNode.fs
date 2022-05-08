@@ -44,5 +44,8 @@ type ASTNode =
     |   NotTest of uint * uint * Token * ASTNode
     |   AndTest of uint * uint * ASTNode * Token * ASTNode
     |   OrTest of uint * uint * ASTNode * Token * ASTNode
+    |   Lambda of uint * uint * Token * ASTNode * Token * ASTNode
+    |   Test of uint * uint * ASTNode * Token * ASTNode * Token * ASTNode
+    |   NamedExpr of uint * uint * ASTNode * Token * ASTNode
     
 

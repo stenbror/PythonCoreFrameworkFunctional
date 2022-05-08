@@ -1,6 +1,7 @@
 
 namespace PythonCoreFrameworkFunctional
 
+
 type Trivia =
     |   Empty
 
@@ -47,6 +48,11 @@ type Token =
     |   PyIs of uint * uint * Trivia array
     |   PyAnd of uint * uint * Trivia array
     |   PyOr of uint * uint * Trivia array
+    |   PyLambda of uint * uint * Trivia array
+    |   PyIf of uint * uint * Trivia array
+    |   PyElse of uint * uint * Trivia array
+    |   PyColonAssign of uint * uint * Trivia array
+    |   PyColon of uint * uint * Trivia array
     static member GetStartPosition(symbol: Token) : uint =
         match symbol with
         |   EOF(s)
@@ -89,11 +95,14 @@ type Token =
         |   PyNot(s, _ , _ )
         |   PyIs(s, _ , _ )
         |   PyAnd(s, _ , _ )
-        |   PyOr(s, _ , _ ) -> s
+        |   PyOr(s, _ , _ )
+        |   PyLambda(s, _ , _ )
+        |   PyIf(s, _ , _ )
+        |   PyElse(s, _ , _ )
+        |   PyColonAssign(s, _ , _ )
+        |   PyColon(s, _ , _ ) -> s
         |   _   ->  0u
         
 type TokenStream = Token list
 
 module PythonCoreTokenizer = ()
-
-

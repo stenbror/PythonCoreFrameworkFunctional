@@ -367,16 +367,54 @@ module PythonCoreExpressionParser =
     and ParseLambda(stream: TokenStream, isCond: bool) : (ASTNode * TokenStream) =
         let spanStart = GetStartPosition stream
         match TryToken stream with
-        | _ ->  raise (SyntaxError(GetStartPosition stream, "Expecting 'lambda' expression!"))
+        |  Some(PyLambda( _ , _ , _ ), rest) ->
+             let op = List.head stream
+             let left, rest2 =  match TryToken rest with
+                                |  Some(PyColon( _ , _ , _), _ ) -> ASTNode.Empty, rest
+                                |  _ ->  ParseVarArgsList rest
+             match TryToken rest2 with
+             |  Some(PyColon( _ , _ , _ ), rest4) ->
+                  let op2 = List.head rest2
+                  let right, rest3 =  match isCond with | true -> ParseTest rest4 | false -> ParseTestNoCond rest4
+                  ASTNode.Lambda(spanStart, GetStartPosition rest3, op, left, op2, right), rest3
+             |  _ ->    raise(SyntaxError(GetStartPosition rest2, "Expecting ':' in 'lambda' expression!"))
+        |  _ ->  raise (SyntaxError(GetStartPosition stream, "Expecting 'lambda' expression!"))
         
     and ParseVarArgsList(stream: TokenStream) : (ASTNode * TokenStream) =
         ASTNode.Empty, stream
         
-    and ParseTestNoCOnd(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+    and ParseTestNoCond(stream: TokenStream) : (ASTNode * TokenStream) =
+        match TryToken stream with
+        |  Some(PyLambda( _ , _ , _ ), _) ->      ParseLambda(stream, false)
+        |  _ ->
+              ParseOrTest stream
         
     and ParseTest(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        |  Some(PyLambda( _ , _ , _ ), _ ) -> ParseLambda(stream, true)
+        | _ ->
+           let left, rest = ParseOrTest stream
+           match TryToken rest with
+           |  Some(PyIf( _ , _ , _ ), rest2) ->
+                   let op1 = List.head rest
+                   let right, rest3 = ParseOrTest rest2
+                   match TryToken rest3 with
+                   |  Some(PyElse( _ , _ , _ ), rest4 ) ->
+                        let op2 = List.head rest3
+                        let next, rest5 = ParseTest rest4
+                        ASTNode.Test(spanStart, GetStartPosition rest5, left, op1, right, op2, next), rest5
+                   | _ ->  raise(SyntaxError(GetStartPosition rest3, "Expecting 'else' in test expression!"))
+           |  _ ->
+                left, rest
         
     and ParseNamedExpr(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        let left, rest = ParseTest stream
+        match TryToken rest with
+        |  Some(PyColonAssign( _ , _ , _ ), rest2 ) ->
+             let op = List.head rest
+             let right, rest3 = ParseTest rest2
+             ASTNode.NamedExpr(spanStart, GetStartPosition rest3, left, op, right), rest3
+        | _ ->
+             left, rest
