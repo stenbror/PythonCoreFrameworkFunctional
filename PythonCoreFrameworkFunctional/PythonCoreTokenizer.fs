@@ -53,6 +53,8 @@ type Token =
     |   PyElse of uint * uint * Trivia array
     |   PyColonAssign of uint * uint * Trivia array
     |   PyColon of uint * uint * Trivia array
+    |   PyYield of uint * uint * Trivia array
+    |   PyFrom of uint * uint * Trivia array
     static member GetStartPosition(symbol: Token) : uint =
         match symbol with
         |   EOF(s)
@@ -100,7 +102,9 @@ type Token =
         |   PyIf(s, _ , _ )
         |   PyElse(s, _ , _ )
         |   PyColonAssign(s, _ , _ )
-        |   PyColon(s, _ , _ ) -> s
+        |   PyColon(s, _ , _ )
+        |   PyYield(s, _ , _ )
+        |   PyFrom(s, _ , _ ) -> s
         |   _   ->  0u
         
 type TokenStream = Token list

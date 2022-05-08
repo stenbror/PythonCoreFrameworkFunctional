@@ -383,6 +383,9 @@ module PythonCoreExpressionParser =
     and ParseVarArgsList(stream: TokenStream) : (ASTNode * TokenStream) =
         ASTNode.Empty, stream
         
+    and ParseVFPDef(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
+        
     and ParseTestNoCond(stream: TokenStream) : (ASTNode * TokenStream) =
         match TryToken stream with
         |  Some(PyLambda( _ , _ , _ ), _) ->      ParseLambda(stream, false)
@@ -418,3 +421,60 @@ module PythonCoreExpressionParser =
              ASTNode.NamedExpr(spanStart, GetStartPosition rest3, left, op, right), rest3
         | _ ->
              left, rest
+             
+    and ParseTestListComp(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
+        
+    and ParseTrailer(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
+        
+    and ParseSubscriptList(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
+        
+    and ParseSubscript(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
+        
+    and ParseExprList(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
+        
+    and ParseTestList(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
+        
+    and ParseArgList(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
+        
+    and ParseArgument(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
+        
+    and ParseDictorSetMaker(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
+        
+    and ParseCompIter(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
+        
+    and ParseSyncCompFor(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
+        
+    and ParseCompFor(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
+        
+    and ParseCompIf(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
+        
+    and ParseYieldExpr(stream: TokenStream) : (ASTNode * TokenStream) =
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        |  Some(Token.PyYield( _ , _ , _ ), rest) ->
+              let op1 = List.head stream
+              match TryToken rest with
+              |  Some(Token.PyFrom( _ , _ , _ ), rest2) ->
+                    let op2 = List.head rest
+                    let right, rest3 = ParseTest rest2
+                    ASTNode.YieldFrom(spanStart, GetStartPosition rest3, op1, op2, right), rest3
+              |  _ ->
+                    let right, rest4 = ParseTestListStarExpr rest
+                    ASTNode.YieldExpr(spanStart, GetStartPosition rest4, op1, right), rest4
+        |  _ -> raise (SyntaxError(GetStartPosition stream, "Expecting 'yield' expression!"))
+        
+    and ParseTestListStarExpr(stream: TokenStream) : (ASTNode * TokenStream) =
+        ASTNode.Empty, stream
