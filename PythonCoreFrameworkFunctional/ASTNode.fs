@@ -47,5 +47,7 @@ type ASTNode =
     |   Lambda of uint * uint * Token * ASTNode * Token * ASTNode
     |   Test of uint * uint * ASTNode * Token * ASTNode * Token * ASTNode
     |   NamedExpr of uint * uint * ASTNode * Token * ASTNode
+    |   YieldFrom of uint * uint * Token * Token * ASTNode
+    |   YieldExpr of uint * uint * Token * ASTNode
     
 
