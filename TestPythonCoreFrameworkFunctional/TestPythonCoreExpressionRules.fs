@@ -1077,3 +1077,33 @@ module ExpressionsRulesTests =
               )), node)
          
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for conditional lambda``() =
+         let stream = [
+              Token.PyLambda(0u, 6u, [|  |])
+              Token.PyColon(6u, 7u, [|  |])
+              Token.Name(8u, 11u, "abc", [|  |])
+              Token.PyIf(12u, 14u, [|  |])
+              Token.Name(15u, 18u, "abc", [|  |])
+              Token.PyElse(19u, 23u, [|  |])
+              Token.Name(24u, 27u, "abc", [|  |])
+              Token.EOF(27u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseNamedExpr stream
+         
+         Assert.Equal(
+                   ASTNode.Lambda(
+                                  0u, 27u,
+                                  Token.PyLambda(0u, 6u, [|  |]),
+                                  ASTNode.Empty,
+                                  Token.PyColon(6u, 7u, [|  |]),
+                                        ASTNode.Test(8u, 27u, 
+                                            ASTNode.Name(8u, 11u, Token.Name(8u, 11u, "abc", [|  |])),
+                                            Token.PyIf(12u, 14u, [|  |]),
+                                            ASTNode.Name(15u, 18u, Token.Name(15u, 18u, "abc", [|  |])),
+                                            Token.PyElse(19u, 23u, [|  |]),
+                                            ASTNode.Name(24u, 27u, Token.Name(24u, 27u, "abc", [|  |]) ) ) )
+              , node)
+         
+         Assert.True(rest.Length = 1)
