@@ -1019,3 +1019,30 @@ module ExpressionsRulesTests =
               ), node)
          
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for NamedExpr empty``() =
+         let stream = [ Token.Name(0u, 3u, "abc", [|  |]); Token.EOF(3u) ]
+         let node, rest = PythonCoreExpressionParser.ParseNamedExpr stream
+         
+         Assert.Equal(ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])), node)
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for NamedExpr``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyColonAssign(4u, 6u, [|  |])
+              Token.Name(8u, 11u, "abc", [|  |])
+              Token.EOF(11u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseNamedExpr stream
+         
+         Assert.Equal(
+                   ASTNode.NamedExpr(0u, 11u, 
+                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                   Token.PyColonAssign(4u, 6u, [|  |]),
+                   ASTNode.Name(8u, 11u, Token.Name(8u, 11u, "abc", [|  |]))
+              ), node)
+         
+         Assert.True(rest.Length = 1)
