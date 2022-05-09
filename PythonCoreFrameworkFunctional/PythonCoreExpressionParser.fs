@@ -507,7 +507,8 @@ module PythonCoreExpressionParser =
                         |  Some(Token.PyColon( _ , _ , _ ), _ )
                         |  Some(Token.PySemiColon( _ , _ , _ ), _ )
                         |  Some(Token.Newline( _ , _ , _ , _ , _ ), _ )
-                        |  Some(Token.EOF( _ ), _ ) -> ()
+                        |  Some(Token.EOF( _ ), _ ) ->
+                                rest <- rest2
                         |  _  ->
                              let node2, rest3 =  match TryToken rest2 with
                                                  |  Some(Token.PyMul( _ , _ , _ ), _ )  -> ParseStarExpr rest2
