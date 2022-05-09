@@ -49,5 +49,6 @@ type ASTNode =
     |   NamedExpr of uint * uint * ASTNode * Token * ASTNode
     |   YieldFrom of uint * uint * Token * Token * ASTNode
     |   YieldExpr of uint * uint * Token * ASTNode
+    |   TestListStarExpr of uint * uint * ASTNode array * Token array
     
 

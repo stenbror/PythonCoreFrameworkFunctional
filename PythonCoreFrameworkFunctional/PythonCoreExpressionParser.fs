@@ -1,5 +1,7 @@
 namespace PythonCoreFrameworkFunctional
 
+open System.Net.Security
+
    
 exception SyntaxError of uint * string
 
@@ -475,6 +477,46 @@ module PythonCoreExpressionParser =
                     let right, rest4 = ParseTestListStarExpr rest
                     ASTNode.YieldExpr(spanStart, GetStartPosition rest4, op1, right), rest4
         |  _ -> raise (SyntaxError(GetStartPosition stream, "Expecting 'yield' expression!"))
-        
+            
     and ParseTestListStarExpr(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        let mutable nodes : ASTNode list = List.Empty
+        let mutable separators : Token list = List.Empty
+        let mutable node, rest = match TryToken stream with
+                                 |  Some(Token.PyMul( _ , _ , _ ), _ )  -> ParseStarExpr stream
+                                 | _ -> ParseTest stream
+        nodes <- node :: nodes
+        while   match TryToken rest with
+                |  Some(Token.PyComma( _ , _ , _ ), rest2 ) ->
+                        separators <- List.head rest :: separators
+                        match TryToken rest2 with   
+                        |  Some(Token.PyPlusAssign( _ , _ , _ ), _ )
+                        |  Some(Token.PyMinusAssign( _ , _ , _ ), _ )
+                        |  Some(Token.PyMulAssign( _ , _ , _ ), _ )
+                        |  Some(Token.PyPowerAssign( _ , _ , _ ), _ )
+                        |  Some(Token.PyMatriceAssign( _ , _ , _ ), _ )
+                        |  Some(Token.PyModuloAssign( _ , _ , _ ), _ )
+                        |  Some(Token.PyBitAndAssign( _ , _ , _ ), _ )
+                        |  Some(Token.PyBitOrAssign( _ , _ , _ ), _ )
+                        |  Some(Token.PyBitXorAssign( _ , _ , _ ), _ )
+                        |  Some(Token.PyShiftLeftAssign( _ , _ , _ ), _ )
+                        |  Some(Token.PyShiftRightAssign( _ , _ , _ ), _ )
+                        |  Some(Token.PyFloorDivAssign( _ , _ , _ ), _ )
+                        |  Some(Token.PyDivAssign( _ , _ , _ ), _ )
+                        |  Some(Token.PyAssign( _ , _ , _ ), _ )
+                        |  Some(Token.PyColon( _ , _ , _ ), _ )
+                        |  Some(Token.PySemiColon( _ , _ , _ ), _ )
+                        |  Some(Token.Newline( _ , _ , _ , _ , _ ), _ )
+                        |  Some(Token.EOF( _ ), _ ) -> ()
+                        |  _  ->
+                             let node2, rest3 =  match TryToken rest2 with
+                                                 |  Some(Token.PyMul( _ , _ , _ ), _ )  -> ParseStarExpr rest2
+                                                 | _ -> ParseTest rest2
+                             rest <- rest3
+                             nodes <- node2 :: nodes
+                        true
+                |  _ ->  false
+            do ()
+        
+        ASTNode.TestListStarExpr(spanStart, GetStartPosition rest, List.toArray(List.rev nodes),
+                                 List.toArray(List.rev separators)), rest

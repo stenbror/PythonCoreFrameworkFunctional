@@ -8,6 +8,7 @@ type Trivia =
 type Token =
     |   Empty
     |   EOF of uint
+    |   Newline of uint * uint * char * char * Trivia array
     |   PyFalse of uint * uint * Trivia array
     |   PyNone of uint * uint * Trivia array
     |   PyTrue of uint * uint * Trivia array
@@ -55,9 +56,26 @@ type Token =
     |   PyColon of uint * uint * Trivia array
     |   PyYield of uint * uint * Trivia array
     |   PyFrom of uint * uint * Trivia array
+    |   PyComma of uint * uint * Trivia array
+    |   PyPlusAssign of uint * uint * Trivia array
+    |   PyMinusAssign of uint * uint * Trivia array
+    |   PyMulAssign of uint * uint * Trivia array
+    |   PyDivAssign of uint * uint * Trivia array
+    |   PyMatriceAssign of uint * uint * Trivia array
+    |   PyModuloAssign of uint * uint * Trivia array
+    |   PyBitAndAssign of uint * uint * Trivia array
+    |   PyBitOrAssign of uint * uint * Trivia array
+    |   PyBitXorAssign of uint * uint * Trivia array
+    |   PyShiftLeftAssign of uint * uint * Trivia array
+    |   PyShiftRightAssign of uint * uint * Trivia array
+    |   PyPowerAssign of uint * uint * Trivia array
+    |   PyFloorDivAssign of uint * uint * Trivia array
+    |   PyAssign of uint * uint * Trivia array
+    |   PySemiColon of uint * uint * Trivia array
     static member GetStartPosition(symbol: Token) : uint =
         match symbol with
         |   EOF(s)
+        |   Newline(s, _ , _ , _ , _ )
         |   PyFalse(s, _ , _ )
         |   PyNone(s, _ , _ )
         |   PyTrue(s, _ , _ )
@@ -104,7 +122,21 @@ type Token =
         |   PyColonAssign(s, _ , _ )
         |   PyColon(s, _ , _ )
         |   PyYield(s, _ , _ )
-        |   PyFrom(s, _ , _ ) -> s
+        |   PyFrom(s, _ , _ )
+        |   PyComma(s, _ , _ )
+        |   PyPlusAssign(s, _ , _ )
+        |   PyMinusAssign(s, _ , _ )
+        |   PyMulAssign(s, _ , _ )
+        |   PyDivAssign(s, _ , _ )
+        |   PyModuloAssign(s, _ , _ )
+        |   PyFloorDivAssign(s, _ , _ )
+        |   PyBitAndAssign(s, _ , _ )
+        |   PyBitOrAssign(s, _ , _ )
+        |   PyBitXorAssign(s, _ , _ )
+        |   PyShiftLeftAssign(s, _ , _ )
+        |   PyShiftRightAssign(s, _ , _ )
+        |   PyPowerAssign(s, _ , _ )
+        |   PyAssign(s, _ , _ ) -> s
         |   _   ->  0u
         
 type TokenStream = Token list
