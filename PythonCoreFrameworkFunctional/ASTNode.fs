@@ -53,5 +53,6 @@ type ASTNode =
     |   CompIf of uint * uint * Token * ASTNode * ASTNode
     |   CompAsyncFor of uint * uint * Token * ASTNode
     |   CompFor of uint * uint * Token * ASTNode * Token * ASTNode * ASTNode
+    |   ExprList of uint * uint * ASTNode array * Token array
     
 
