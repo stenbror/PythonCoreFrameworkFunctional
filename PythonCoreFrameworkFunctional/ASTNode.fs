@@ -51,5 +51,7 @@ type ASTNode =
     |   YieldExpr of uint * uint * Token * ASTNode
     |   TestListStarExpr of uint * uint * ASTNode array * Token array
     |   CompIf of uint * uint * Token * ASTNode * ASTNode
+    |   CompAsyncFor of uint * uint * Token * ASTNode
+    |   CompFor of uint * uint * Token * ASTNode * Token * ASTNode * ASTNode
     
 

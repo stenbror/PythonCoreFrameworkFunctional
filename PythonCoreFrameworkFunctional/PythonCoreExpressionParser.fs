@@ -462,7 +462,13 @@ module PythonCoreExpressionParser =
         ASTNode.Empty, stream
         
     and ParseCompFor(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        |  Some(Token.PyAsync( _ , _ , _ ), rest ) ->
+             let op = List.head stream
+             let right, rest2 = ParseSyncCompFor rest
+             ASTNode.CompAsyncFor(spanStart, GetStartPosition rest2, op, right), rest2
+        |  _ -> ParseSyncCompFor stream
         
     and ParseCompIf(stream: TokenStream) : (ASTNode * TokenStream) =
         let spanStart = GetStartPosition stream
