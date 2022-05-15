@@ -465,7 +465,14 @@ module PythonCoreExpressionParser =
         ASTNode.Empty, stream
         
     and ParseCompIf(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        |   Some(Token.PyIf( _ , _ , _ ), rest ) ->
+                let op = List.head stream
+                let right, rest2 = ParseTestNoCond rest
+                let next, rest3 = ParseCompIter rest2
+                ASTNode.CompIf(spanStart, GetStartPosition rest3, op, right, next), rest3
+        |   _ ->   raise (SyntaxError(GetStartPosition stream, "Expecting 'if' in comprehension expression!"))
         
     and ParseYieldExpr(stream: TokenStream) : (ASTNode * TokenStream) =
         let spanStart = GetStartPosition stream
