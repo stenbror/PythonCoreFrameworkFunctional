@@ -1177,3 +1177,25 @@ module ExpressionsRulesTests =
               , node)
          
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for yield expression with trailing comma``() =
+         let stream = [
+              Token.PyYield(0u, 5u, [|  |])
+              Token.Name(6u, 9u, "abc", [|  |])
+              Token.PyComma(9u, 10u, [|  |])
+              Token.EOF(10u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseYieldExpr stream
+         
+         Assert.Equal(
+                   ASTNode.YieldExpr(
+                                  0u, 10u,
+                                  Token.PyYield(0u, 5u, [|  |]),
+                                  ASTNode.TestListStarExpr(6u, 10u, [|  
+                                      ASTNode.Name(6u, 9u, Token.Name(6u, 9u, "abc", [|  |]))
+                                      |], [| Token.PyComma(9u, 10u, [|  |]) |] )
+                                      )
+              , node)
+         
+         Assert.True(rest.Length = 1)
