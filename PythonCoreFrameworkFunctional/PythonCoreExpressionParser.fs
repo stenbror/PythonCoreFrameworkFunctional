@@ -1,5 +1,6 @@
 namespace PythonCoreFrameworkFunctional
 
+open System
 open System.Net.Security
 
    
@@ -459,7 +460,20 @@ module PythonCoreExpressionParser =
         |  _ ->  ASTNode.Empty, stream
         
     and ParseSyncCompFor(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        |  Some(Token.PyFor( _ , _ , _ ), rest ) ->
+              let op1 = List.head stream
+              let left, rest2 = ParseExprList rest
+              match TryToken rest2 with
+              |  Some(Token.PyIn( _ , _ , _ ), rest3 ) ->
+                    let op2 = List.head rest2
+                    let right, rest4 = ParseOrTest rest3
+                    let next, rest5 = ParseCompIter rest4
+                    ASTNode.CompFor(spanStart, GetStartPosition rest5, op1, left, op2, right, next), rest5
+              |  _ ->  raise (SyntaxError(GetStartPosition rest2, "Expecting 'in' in 'for' comprehension expression!"))
+        |  _ -> raise (SyntaxError(GetStartPosition stream, "Expecting 'for' in 'for' comprehension expression!"))
+        
         
     and ParseCompFor(stream: TokenStream) : (ASTNode * TokenStream) =
         let spanStart = GetStartPosition stream
