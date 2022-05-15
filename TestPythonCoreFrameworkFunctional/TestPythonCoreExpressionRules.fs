@@ -1199,3 +1199,27 @@ module ExpressionsRulesTests =
               , node)
          
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for yield expression with multiple elements``() =
+         let stream = [
+              Token.PyYield(0u, 5u, [|  |])
+              Token.Name(6u, 9u, "abc", [|  |])
+              Token.PyComma(9u, 10u, [|  |])
+              Token.Name(10u, 13u, "def", [|  |])
+              Token.EOF(13u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseYieldExpr stream
+         
+         Assert.Equal(
+                   ASTNode.YieldExpr(
+                                  0u, 13u,
+                                  Token.PyYield(0u, 5u, [|  |]),
+                                  ASTNode.TestListStarExpr(6u, 13u, [|  
+                                          ASTNode.Name(6u, 9u, Token.Name(6u, 9u, "abc", [|  |]))
+                                          ASTNode.Name(10u, 13u, Token.Name(10u, 13u, "def", [|  |]))
+                                      |], [| Token.PyComma(9u, 10u, [|  |]) |] )
+                                      )
+              , node)
+         
+         Assert.True(rest.Length = 1)
