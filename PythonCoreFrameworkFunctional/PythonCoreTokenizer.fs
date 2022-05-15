@@ -72,6 +72,8 @@ type Token =
     |   PyFloorDivAssign of uint * uint * Trivia array
     |   PyAssign of uint * uint * Trivia array
     |   PySemiColon of uint * uint * Trivia array
+    |   PyFor of uint * uint * Trivia array
+    |   PyAsync of uint * uint * Trivia array
     static member GetStartPosition(symbol: Token) : uint =
         match symbol with
         |   EOF(s)
@@ -136,7 +138,9 @@ type Token =
         |   PyShiftLeftAssign(s, _ , _ )
         |   PyShiftRightAssign(s, _ , _ )
         |   PyPowerAssign(s, _ , _ )
-        |   PyAssign(s, _ , _ ) -> s
+        |   PyAssign(s, _ , _ )
+        |   PyAsync(s, _ , _ )
+        |   PyFor(s, _ , _ ) -> s
         |   _   ->  0u
         
 type TokenStream = Token list

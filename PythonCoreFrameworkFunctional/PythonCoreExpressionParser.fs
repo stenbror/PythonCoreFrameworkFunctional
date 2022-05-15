@@ -452,7 +452,11 @@ module PythonCoreExpressionParser =
         ASTNode.Empty, stream
         
     and ParseCompIter(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        match TryToken stream with
+        |  Some(Token.PyFor( _ , _ , _ ), _ )
+        |  Some(Token.PyAsync( _ , _ , _ ), _ ) ->  ParseCompFor stream
+        |  Some(Token.PyIf( _ , _ , _ ), _ ) -> ParseCompIf stream
+        |  _ ->  ASTNode.Empty, stream
         
     and ParseSyncCompFor(stream: TokenStream) : (ASTNode * TokenStream) =
         ASTNode.Empty, stream
