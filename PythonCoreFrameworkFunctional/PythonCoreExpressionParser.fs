@@ -466,7 +466,28 @@ module PythonCoreExpressionParser =
                          List.toArray(List.rev separarors)), rest
         
     and ParseTestList(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        let mutable nodes : ASTNode List = List.Empty
+        let mutable separarors: Token List = List.Empty
+        let mutable node, rest = ParseTest stream
+        nodes <- node :: nodes
+        while match TryToken rest with
+              |  Some(Token.PyComma( _ , _ , _ ), rest2 ) ->
+                   separarors <- List.head rest :: separarors
+                   match TryToken rest2 with
+                   |  Some(Token.PySemiColon( _ , _ , _ ), _ )
+                   |  Some(Token.Newline( _ , _ , _ , _ , _ ), _ )
+                   |  Some(Token.EOF( _ ), _ ) ->
+                        rest <- rest2
+                        false
+                   |  _ ->
+                        let node2, rest3 = ParseTest rest2
+                        rest <- rest3
+                        nodes <- node2 :: nodes
+                        true
+              |  _ -> false
+           do ()
+        ASTNode.TestList(spanStart, GetStartPosition rest, List.toArray(List.rev nodes), List.toArray(List.rev separarors)), rest
         
     and ParseArgList(stream: TokenStream) : (ASTNode * TokenStream) =
         ASTNode.Empty, stream
