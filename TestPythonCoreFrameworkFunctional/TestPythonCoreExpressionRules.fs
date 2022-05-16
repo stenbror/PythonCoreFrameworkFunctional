@@ -1268,3 +1268,156 @@ module ExpressionsRulesTests =
               , node)
          
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for comp sync for``() =
+         let stream = [
+              Token.PyFor(0u, 3u, [|  |])
+              Token.Name(4u, 7u, "abc", [|  |])
+              Token.PyIn(8u, 10u, [|  |])
+              Token.Name(11u, 14u, "abc", [|  |])
+              Token.EOF(14u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseCompIter stream
+         
+         Assert.Equal(
+                   ASTNode.CompFor(
+                                  0u, 14u,
+                                  Token.PyFor(0u, 3u, [|  |]),
+                                  ASTNode.ExprList(4u, 8u, [|
+                                        ASTNode.Name(4u, 7u, Token.Name(4u, 7u, "abc", [|  |]))
+                                        |],
+                                        [|  |]
+                                  ),
+                                  Token.PyIn(8u, 10u, [|  |]),
+                                  ASTNode.Name(11u, 14u, Token.Name(11u, 14u, "abc", [|  |])),
+                                  ASTNode.Empty)
+              , node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for comp sync for with trailing comma``() =
+         let stream = [
+              Token.PyFor(0u, 3u, [|  |])
+              Token.Name(4u, 7u, "abc", [|  |])
+              Token.PyComma(7u, 8u, [|  |])
+              Token.PyIn(8u, 10u, [|  |])
+              Token.Name(11u, 14u, "abc", [|  |])
+              Token.EOF(14u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseCompIter stream
+         
+         Assert.Equal(
+                   ASTNode.CompFor(
+                                  0u, 14u,
+                                  Token.PyFor(0u, 3u, [|  |]),
+                                  ASTNode.ExprList(4u, 8u, [|
+                                        ASTNode.Name(4u, 7u, Token.Name(4u, 7u, "abc", [|  |]))
+                                        |],
+                                        [| Token.PyComma(7u, 8u, [|  |]) |]
+                                  ),
+                                  Token.PyIn(8u, 10u, [|  |]),
+                                  ASTNode.Name(11u, 14u, Token.Name(11u, 14u, "abc", [|  |])),
+                                  ASTNode.Empty)
+              , node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for comp sync for with multiple element in exprlist``() =
+         let stream = [
+              Token.PyFor(0u, 3u, [|  |])
+              Token.Name(4u, 7u, "abc", [|  |])
+              Token.PyComma(7u, 8u, [|  |])
+              Token.Name(9u, 12u, "abc", [|  |])
+              Token.PyIn(13u, 15u, [|  |])
+              Token.Name(16u, 19u, "abc", [|  |])
+              Token.EOF(19u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseCompIter stream
+         
+         Assert.Equal(
+                   ASTNode.CompFor(
+                                  0u, 19u,
+                                  Token.PyFor(0u, 3u, [|  |]),
+                                  ASTNode.ExprList(4u, 13u, [|
+                                        ASTNode.Name(4u, 7u, Token.Name(4u, 7u, "abc", [|  |]))
+                                        ASTNode.Name(9u, 12u, Token.Name(9u, 12u, "abc", [|  |]))
+                                        |],
+                                        [| Token.PyComma(7u, 8u, [|  |]) |]
+                                  ),
+                                  Token.PyIn(13u, 15u, [|  |]),
+                                  ASTNode.Name(16u, 19u, Token.Name(16u, 19u, "abc", [|  |])),
+                                  ASTNode.Empty)
+              , node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for comp sync for with multiple element in exprlist with if``() =
+         let stream = [
+              Token.PyFor(0u, 3u, [|  |])
+              Token.Name(4u, 7u, "abc", [|  |])
+              Token.PyComma(7u, 8u, [|  |])
+              Token.Name(9u, 12u, "abc", [|  |])
+              Token.PyIn(13u, 15u, [|  |])
+              Token.Name(16u, 19u, "abc", [|  |])
+              Token.PyIf(20u, 22u, [|  |])
+              Token.Name(23u, 26u, "abc", [|  |])
+              Token.EOF(26u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseCompIter stream
+         
+         Assert.Equal(
+                   ASTNode.CompFor(
+                                  0u, 26u,
+                                  Token.PyFor(0u, 3u, [|  |]),
+                                  ASTNode.ExprList(4u, 13u, [|
+                                        ASTNode.Name(4u, 7u, Token.Name(4u, 7u, "abc", [|  |]))
+                                        ASTNode.Name(9u, 12u, Token.Name(9u, 12u, "abc", [|  |]))
+                                        |],
+                                        [| Token.PyComma(7u, 8u, [|  |]) |]
+                                  ),
+                                  Token.PyIn(13u, 15u, [|  |]),
+                                  ASTNode.Name(16u, 19u, Token.Name(16u, 19u, "abc", [|  |])),
+                                  ASTNode.CompIf(20u, 26u,
+                                                 Token.PyIf(20u, 22u, [|  |]),
+                                                 ASTNode.Name(23u, 26u, Token.Name(23u, 26u, "abc", [|  |] ) ),
+                                                 ASTNode.Empty
+                                  )
+                          )
+              , node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for comp async for``() =
+         let stream = [
+              Token.PyAsync(0u, 5u, [|  |])
+              Token.PyFor(6u, 9u, [|  |])
+              Token.Name(10u, 13u, "abc", [|  |])
+              Token.PyIn(14u, 16u, [|  |])
+              Token.Name(17u, 20u, "abc", [|  |])
+              Token.EOF(20u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseCompIter stream
+         
+         Assert.Equal(
+                   ASTNode.CompAsyncFor(0u, 20u, 
+                   
+                        Token.PyAsync(0u, 5u, [|  |]),
+                        ASTNode.CompFor(
+                                       6u, 20u,
+                                       Token.PyFor(6u, 9u, [|  |]),
+                                       ASTNode.ExprList(10u, 14u, [|
+                                             ASTNode.Name(10u, 13u, Token.Name(10u, 13u, "abc", [|  |]))
+                                             |],
+                                             [|  |]
+                                       ),
+                                       Token.PyIn(14u, 16u, [|  |]),
+                                       ASTNode.Name(17u, 20u, Token.Name(17u, 20u, "abc", [|  |])),
+                                       ASTNode.Empty) )
+              , node)
+         
+         Assert.True(rest.Length = 1)
