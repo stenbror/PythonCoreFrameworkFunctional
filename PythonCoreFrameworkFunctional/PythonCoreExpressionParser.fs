@@ -1,18 +1,9 @@
 namespace PythonCoreFrameworkFunctional
 
+open PythonCoreFrameworkFunctional.ParserUtilities
 
 module PythonCoreExpressionParser =
     
-    let TryToken (stream: TokenStream) : (Token * TokenStream) option =
-        match stream with
-        |   symbol :: rest ->   Some(symbol, rest)
-        |   _ ->    Option.None
-        
-    let GetStartPosition(stream: TokenStream) : uint =
-            if stream.Length > 0 then
-                Token.GetStartPosition(stream.Head)
-            else 0u
-
     let rec ParseAtom(stream: TokenStream) : (ASTNode * TokenStream) =
         match TryToken stream with
         |   Some(Token.PyFalse(s, e, _ ), rest) ->
