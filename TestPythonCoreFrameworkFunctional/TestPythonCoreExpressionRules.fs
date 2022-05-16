@@ -1242,3 +1242,29 @@ module ExpressionsRulesTests =
               , node)
          
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for double comp if``() =
+         let stream = [
+              Token.PyIf(0u, 2u, [|  |])
+              Token.Name(3u, 6u, "abc", [|  |])
+              Token.PyIf(7u, 9u, [|  |])
+              Token.Name(10u, 13u, "abc", [|  |])
+              Token.EOF(13u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseCompIter stream
+         
+         Assert.Equal(
+                   ASTNode.CompIf(
+                                  0u, 13u,
+                                  Token.PyIf(0u, 2u, [|  |]),
+                                  ASTNode.Name(3u, 6u, Token.Name(3u, 6u, "abc", [|  |])),
+                                  ASTNode.CompIf(
+                                        7u, 13u,
+                                        Token.PyIf(7u, 9u, [|  |]),
+                                        ASTNode.Name(10u, 13u, Token.Name(10u, 13u, "abc", [|  |])),
+                                        ASTNode.Empty)
+                                  )
+              , node)
+         
+         Assert.True(rest.Length = 1)
