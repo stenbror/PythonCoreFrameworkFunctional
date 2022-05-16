@@ -1,11 +1,5 @@
 namespace PythonCoreFrameworkFunctional
 
-open System
-open System.Net.Security
-
-   
-exception SyntaxError of uint * string
-
 
 module PythonCoreExpressionParser =
     

@@ -8,6 +8,7 @@
     <ItemGroup>
         <Compile Include="PythonCoreTokenizer.fs" />
         <Compile Include="ASTNode.fs" />
+        <Compile Include="PythonCoreParser.fs" />
         <Compile Include="PythonCoreExpressionParser.fs" />
     </ItemGroup>
 
