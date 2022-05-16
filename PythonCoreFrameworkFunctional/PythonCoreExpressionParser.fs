@@ -468,12 +468,12 @@ module PythonCoreExpressionParser =
     and ParseTestList(stream: TokenStream) : (ASTNode * TokenStream) =
         let spanStart = GetStartPosition stream
         let mutable nodes : ASTNode List = List.Empty
-        let mutable separarors: Token List = List.Empty
+        let mutable separators: Token List = List.Empty
         let mutable node, rest = ParseTest stream
         nodes <- node :: nodes
         while match TryToken rest with
               |  Some(Token.PyComma( _ , _ , _ ), rest2 ) ->
-                   separarors <- List.head rest :: separarors
+                   separators <- List.head rest :: separators
                    match TryToken rest2 with
                    |  Some(Token.PySemiColon( _ , _ , _ ), _ )
                    |  Some(Token.Newline( _ , _ , _ , _ , _ ), _ )
@@ -487,10 +487,29 @@ module PythonCoreExpressionParser =
                         true
               |  _ -> false
            do ()
-        ASTNode.TestList(spanStart, GetStartPosition rest, List.toArray(List.rev nodes), List.toArray(List.rev separarors)), rest
+        ASTNode.TestList(spanStart, GetStartPosition rest, List.toArray(List.rev nodes), List.toArray(List.rev separators)), rest
         
     and ParseArgList(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        let mutable nodes : ASTNode List = List.Empty
+        let mutable separators : Token List = List.Empty
+        let mutable node, rest = ParseArgument stream
+        nodes <- node :: nodes
+        while   match TryToken rest with
+                |  Some(Token.PyComma( _ , _ , _ ), rest2 ) ->
+                     separators <- List.head rest :: separators
+                     match TryToken rest2 with
+                     |  Some(Token.PyRightParen( _ , _ , _ ), _ ) ->
+                           false
+                     |  _ ->
+                           let node2, rest3 = ParseArgument rest2
+                           nodes <- node2 :: nodes
+                           rest <- rest3
+                           true
+                |  _ -> false
+           do ()
+        ASTNode.ArgumentList(spanStart, GetStartPosition rest,
+                             List.toArray(List.rev nodes), List.toArray(List.rev separators)), stream
         
     and ParseArgument(stream: TokenStream) : (ASTNode * TokenStream) =
         ASTNode.Empty, stream
