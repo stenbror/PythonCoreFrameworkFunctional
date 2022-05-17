@@ -495,7 +495,7 @@ module PythonCoreExpressionParser =
                 |  _ -> false
            do ()
         ASTNode.ArgumentList(spanStart, GetStartPosition rest,
-                             List.toArray(List.rev nodes), List.toArray(List.rev separators)), stream
+                             List.toArray(List.rev nodes), List.toArray(List.rev separators)), rest
         
     and ParseArgument(stream: TokenStream) : (ASTNode * TokenStream) =
         let spanStart = GetStartPosition stream

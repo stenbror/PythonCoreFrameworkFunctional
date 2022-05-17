@@ -1421,3 +1421,138 @@ module ExpressionsRulesTests =
               , node)
          
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for Argumentlist with single element``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.EOF(3u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseArgList stream
+         
+         Assert.Equal(
+                   ASTNode.ArgumentList(0u, 3u, 
+                              [|
+                                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |]))
+                              |], [|  |]
+                        )
+              , node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for Argumentlist with single element with :=``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyColonAssign(4u, 6u, [|  |])
+              Token.Name(7u, 10u, "abc", [|  |])
+              Token.EOF(10u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseArgList stream
+         
+         Assert.Equal(
+                   ASTNode.ArgumentList(0u, 10u, 
+                              [|
+                                   ASTNode.Argument(0u, 10u,
+                                     ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                                     Token.PyColonAssign(4u, 6u, [|  |]),
+                                     ASTNode.Name(7u, 10u, Token.Name(7u, 10u, "abc", [|  |]))
+                                     )
+                              |], [|  |]
+                        )
+              , node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for Argumentlist with single element with =``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyAssign(4u, 5u, [|  |])
+              Token.Name(7u, 10u, "abc", [|  |])
+              Token.EOF(10u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseArgList stream
+         
+         Assert.Equal(
+                   ASTNode.ArgumentList(0u, 10u, 
+                              [|
+                                   ASTNode.Argument(0u, 10u,
+                                     ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                                     Token.PyAssign(4u, 5u, [|  |]),
+                                     ASTNode.Name(7u, 10u, Token.Name(7u, 10u, "abc", [|  |]))
+                                     )
+                              |], [|  |]
+                        )
+              , node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for Argumentlist with single element with async``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyAsync(4u, 9u, [|  |])
+              Token.PyFor(10u, 13u, [|  |])
+              Token.Name(14u, 17u, "abc", [|  |])
+              Token.PyIn(18u, 20u, [|  |])
+              Token.Name(21u, 24u, "abc", [|  |])
+              Token.EOF(24u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseArgList stream
+         
+         Assert.Equal(
+                   ASTNode.ArgumentList(0u, 24u, 
+                              [|
+                                   ASTNode.Argument(0u, 24u,
+                                     ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                                     Token.Empty,
+                                     ASTNode.CompAsyncFor(4u, 24u, Token.PyAsync(4u, 9u, [|  |]),
+                                         ASTNode.CompFor(10u, 24u, Token.PyFor(10u, 13u, [|  |]),
+                                              ASTNode.ExprList(14u, 18u, [|
+                                                       ASTNode.Name(14u, 17u, Token.Name(14u, 17u, "abc", [|  |]))
+                                                    |], [|  |]),
+                                              Token.PyIn(18u, 20u, [|  |]),
+                                              ASTNode.Name(21u, 24u, Token.Name(21u, 24u, "abc", [|  |])),
+                                              ASTNode.Empty
+                                              )                 
+                                         )
+                                     )
+                              |], [|  |]
+                        )
+              , node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for Argumentlist with single element with for``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyFor(10u, 13u, [|  |])
+              Token.Name(14u, 17u, "abc", [|  |])
+              Token.PyIn(18u, 20u, [|  |])
+              Token.Name(21u, 24u, "abc", [|  |])
+              Token.EOF(24u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseArgList stream
+         
+         Assert.Equal(
+                   ASTNode.ArgumentList(0u, 24u, 
+                              [|
+                                   ASTNode.Argument(0u, 24u,
+                                     ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |])),
+                                     Token.Empty,
+                                         ASTNode.CompFor(10u, 24u, Token.PyFor(10u, 13u, [|  |]),
+                                              ASTNode.ExprList(14u, 18u, [|
+                                                       ASTNode.Name(14u, 17u, Token.Name(14u, 17u, "abc", [|  |]))
+                                                    |], [|  |]),
+                                              Token.PyIn(18u, 20u, [|  |]),
+                                              ASTNode.Name(21u, 24u, Token.Name(21u, 24u, "abc", [|  |])),
+                                              ASTNode.Empty
+                                              )                 
+                                         )
+                              |], [|  |]
+                        )
+              , node)
+         
+         Assert.True(rest.Length = 1)
