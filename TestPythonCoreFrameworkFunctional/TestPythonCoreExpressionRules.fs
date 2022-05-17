@@ -1556,3 +1556,88 @@ module ExpressionsRulesTests =
               , node)
          
          Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for Argumentlist with single element with *``() =
+         let stream = [
+              Token.PyMul(0u, 1u, [|  |])
+              Token.Name(1u, 4u, "abc", [|  |])
+              Token.EOF(4u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseArgList stream
+         
+         Assert.Equal(
+                   ASTNode.ArgumentList(0u, 4u, 
+                              [|
+                                   ASTNode.Argument(0u, 4u,
+                                                    ASTNode.Empty,
+                                                    Token.PyMul(0u, 1u, [|  |]),   
+                                                    ASTNode.Name(1u, 4u, Token.Name(1u, 4u, "abc", [|  |])) )
+                              |], [|  |]
+                        )
+              , node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for Argumentlist with single element with **``() =
+         let stream = [
+              Token.PyPower(0u, 2u, [|  |])
+              Token.Name(2u, 5u, "abc", [|  |])
+              Token.EOF(5u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseArgList stream
+         
+         Assert.Equal(
+                   ASTNode.ArgumentList(0u, 5u, 
+                              [|
+                                   ASTNode.Argument(0u, 5u,
+                                                    ASTNode.Empty,
+                                                    Token.PyPower(0u, 2u, [|  |]),   
+                                                    ASTNode.Name(2u, 5u, Token.Name(2u, 5u, "abc", [|  |])) )
+                              |], [|  |]
+                        )
+              , node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for Argumentlist with double element``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyComma(4u, 5u, [|  |])
+              Token.Name(6u, 9u, "abc", [|  |])
+              Token.EOF(9u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseArgList stream
+         
+         Assert.Equal(
+                   ASTNode.ArgumentList(0u, 9u, 
+                              [|
+                                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |]))
+                                   ASTNode.Name(6u, 9u, Token.Name(6u, 9u, "abc", [|  |]))
+                              |], [| Token.PyComma(4u, 5u, [|  |]) |]
+                        )
+              , node)
+         
+         Assert.True(rest.Length = 1)
+         
+    [<Fact>]
+    let ``Test Atom Expression rule for Argumentlist with single element and trailing comma``() =
+         let stream = [
+              Token.Name(0u, 3u, "abc", [|  |])
+              Token.PyComma(4u, 5u, [|  |])
+              Token.PyRightParen(6u, 7u, [|  |])
+              Token.EOF(7u)
+         ]
+         let node, rest = PythonCoreExpressionParser.ParseArgList stream
+         
+         Assert.Equal(
+                   ASTNode.ArgumentList(0u, 6u, 
+                              [|
+                                   ASTNode.Name(0u, 3u, Token.Name(0u, 3u, "abc", [|  |]))
+                              |], [| Token.PyComma(4u, 5u, [|  |]) |]
+                        )
+              , node)
+         
+         Assert.True(rest.Length = 2)

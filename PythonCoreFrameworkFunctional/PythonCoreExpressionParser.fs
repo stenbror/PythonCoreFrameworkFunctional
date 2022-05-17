@@ -486,6 +486,7 @@ module PythonCoreExpressionParser =
                      separators <- List.head rest :: separators
                      match TryToken rest2 with
                      |  Some(Token.PyRightParen( _ , _ , _ ), _ ) ->
+                           rest <- rest2
                            false
                      |  _ ->
                            let node2, rest3 = ParseArgument rest2
