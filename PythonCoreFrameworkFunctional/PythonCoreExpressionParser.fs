@@ -418,7 +418,27 @@ module PythonCoreExpressionParser =
         ASTNode.Empty, stream
         
     and ParseSubscriptList(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        let mutable nodes : ASTNode List = List.Empty
+        let mutable separators : Token List = List.Empty
+        let mutable node, rest = ParseSubscript stream
+        nodes <- node :: nodes
+        while   match TryToken rest with
+                |  Some(Token.PyComma( _ , _ , _ ), rest2 ) ->
+                     separators <- List.head rest :: separators
+                     match TryToken rest2 with
+                     |  Some(Token.PyRightBracket( _ , _ , _ ), _ ) ->
+                           rest <- rest2
+                           false
+                     |  _ ->
+                           let node2, rest3 = ParseSubscript rest2
+                           nodes <- node2 :: nodes
+                           rest <- rest3
+                           true
+                |  _ -> false
+           do ()
+        ASTNode.SubscriptList(spanStart, GetStartPosition rest,
+                             List.toArray(List.rev nodes), List.toArray(List.rev separators)), rest
         
     and ParseSubscript(stream: TokenStream) : (ASTNode * TokenStream) =
         ASTNode.Empty, stream

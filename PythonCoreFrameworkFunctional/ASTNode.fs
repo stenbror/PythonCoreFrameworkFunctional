@@ -57,6 +57,8 @@ type ASTNode =
     |   TestList of uint * uint * ASTNode array * Token array
     |   ArgumentList of uint * uint * ASTNode array * Token array
     |   Argument of uint * uint * ASTNode * Token * ASTNode
+    |   SubscriptList of uint * uint * ASTNode array * Token array
+    |   Subscript of uint * uint * ASTNode * Token * ASTNode * Token * ASTNode
     
     |   EvalInput of uint * uint * ASTNode * Token array * Token
     
