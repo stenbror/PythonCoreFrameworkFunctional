@@ -56,6 +56,7 @@ type ASTNode =
     |   ExprList of uint * uint * ASTNode array * Token array
     |   TestList of uint * uint * ASTNode array * Token array
     |   ArgumentList of uint * uint * ASTNode array * Token array
+    |   Argument of uint * uint * ASTNode * Token * ASTNode
     
     |   EvalInput of uint * uint * ASTNode * Token array * Token
     

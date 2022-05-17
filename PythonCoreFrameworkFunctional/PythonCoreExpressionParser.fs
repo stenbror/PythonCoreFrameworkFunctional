@@ -1,5 +1,6 @@
 namespace PythonCoreFrameworkFunctional
 
+open System.IO
 open PythonCoreFrameworkFunctional.ParserUtilities
 
 module PythonCoreExpressionParser =
@@ -497,7 +498,27 @@ module PythonCoreExpressionParser =
                              List.toArray(List.rev nodes), List.toArray(List.rev separators)), stream
         
     and ParseArgument(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        |  Some(Token.PyMul( _ , _ , _ ), rest )
+        |  Some(Token.PyPower( _ , _ , _ ), rest ) ->
+              let op = List.head stream
+              let right, rest2 = ParseTest rest
+              ASTNode.Argument(spanStart, GetStartPosition rest2, ASTNode.Empty, op, right), rest2
+        |  _ ->
+             let left, rest3 = ParseTest stream
+             match TryToken rest3 with
+             |    Some(Token.PyAsync( _ , _ , _ ), _ )
+             |    Some(Token.PyFor( _ , _ , _ ), _ ) ->
+                     let right, rest4 = ParseCompFor rest3
+                     ASTNode.Argument(spanStart, GetStartPosition rest4, left, Token.Empty, right), rest4
+             |    Some(Token.PyColonAssign( _ , _ , _ ), rest5)
+             |    Some(Token.PyAssign( _ , _ , _ ), rest5) ->
+                     let op = List.head rest3
+                     let right, rest6 = ParseTest rest5
+                     ASTNode.Argument(spanStart, GetStartPosition rest6, left, op, right), rest6
+             |  _ ->
+                  left, rest3
         
     and ParseDictorSetMaker(stream: TokenStream) : (ASTNode * TokenStream) =
         ASTNode.Empty, stream
