@@ -441,7 +441,15 @@ module PythonCoreExpressionParser =
                              List.toArray(List.rev nodes), List.toArray(List.rev separators)), rest
         
     and ParseSubscript(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        let mutable first = ASTNode.Empty
+        let op1 = Token.Empty
+        let mutable second = ASTNode.Empty
+        let op2 = Token.Empty
+        let mutable third = ASTNode.Empty
+        let mutable rest = stream
+        
+        ASTNode.Subscript(spanStart, GetStartPosition rest, first, op1, second, op2, third ), rest
         
     and ParseExprList(stream: TokenStream) : (ASTNode * TokenStream) =
         let spanStart = GetStartPosition stream
