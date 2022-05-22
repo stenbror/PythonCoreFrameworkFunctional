@@ -409,7 +409,88 @@ module PythonCoreExpressionParser =
         |  _ ->  raise (SyntaxError(GetStartPosition stream, "Expecting 'lambda' expression!"))
         
     and ParseVarArgsList(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        let mutable mulOp = Token.Empty
+        let mutable powerOp = Token.Empty
+        let mutable mulNode = ASTNode.Empty
+        let mutable powerNode = ASTNode.Empty
+        let mutable nodes : ASTNode List = List.Empty
+        let mutable separators : Token List = List.Empty
+        let mutable rest = stream
+        
+        match TryToken rest with
+        |   Some(Token.PyPower( _ , _ , _ ), rest2 ) ->
+                powerOp <- List.head rest
+                let node1, rest3 = ParseVFPDef rest2
+                powerNode <- node1
+                rest <- rest3
+                match TryToken rest with
+                |   Some(Token.PyComma( _ , _ , _ ), rest4) ->
+                        separators <- List.head rest :: separators
+                        rest <- rest4
+                |   _ -> ()
+        |   Some(Token.PyMul( _ , _ , _ ), rest5 ) ->
+                mulOp <- List.head rest
+                let node2, rest6 = ParseVFPDef rest5
+                mulNode <- node2
+                rest <- rest6
+                while   match TryToken rest with
+                        |   Some(Token.PyComma( _ , _ , _ ), rest7) ->
+                                separators <- List.head rest :: separators
+                                match TryToken rest7 with
+                                |   Some(Token.PyPower( _ , _ , _ ), rest8) ->
+                                        powerOp <- List.head rest
+                                        let node1, rest3 = ParseVFPDef rest8
+                                        powerNode <- node1
+                                        rest <- rest3
+                                        match TryToken rest with
+                                        |   Some(Token.PyComma( _ , _ , _ ), rest4) ->
+                                                separators <- List.head rest :: separators
+                                                rest <- rest4
+                                        |   _ -> ()
+                                        false
+                                |   _ ->
+                                        let node3, rest9 = ParseVFPDef rest7
+                                        match TryToken rest9 with
+                                        |   Some(Token.PyAssign( _ , _ , _ ), rest10) ->
+                                                let op = List.head rest9
+                                                let node4, rest11 = ParseTest rest10
+                                                nodes <- ASTNode.VFPDefAssign(spanStart, GetStartPosition rest11, node3, op, node4) :: nodes
+                                                rest <- rest11
+                                        |   _ ->
+                                                nodes <- node3 :: nodes
+                                                rest <- rest9
+                                        true
+                        |   _ ->  false
+                   do ()
+        |   _ ->
+                let node10, rest10 = ParseVFPDef rest
+                match TryToken rest10 with
+                |   Some(Token.PyAssign( _ , _ , _ ), rest11) ->
+                        let op = List.head rest10
+                        let node11, rest12 = ParseTest rest11
+                        nodes <- ASTNode.VFPDefAssign(spanStart, GetStartPosition rest12, node10, op, node11) :: nodes
+                        rest <- rest12
+                |   _ ->
+                        nodes <- node10 :: nodes
+                        rest <- rest10
+                
+                while   match TryToken rest with
+                        |   Some(Token.PyComma( _ , _ , _ ), rest13) ->
+                                separators <- List.head rest :: separators
+                                match TryToken rest13 with // TODO: Handle more members below!
+                                |   Some(Token.PyMul( _ , _ , _ ), rest14) 
+                                |   Some(Token.PyPower( _ , _ , _ ), rest14) -> ()
+                                |   Some(Token.PyComma( _ , _ , _ ), _ ) ->
+                                        raise (SyntaxError(GetStartPosition rest13, "Unexpected ',' in list!"))
+                                |   _ ->
+                                        ()
+                                true
+                        |   _ -> false
+                    do ()
+        
+        ASTNode.VarArgsList(spanStart, GetStartPosition rest, mulOp, mulNode, powerOp, powerNode,
+                            List.toArray(List.rev nodes), List.toArray(List.rev separators)), rest
         
     and ParseVFPDef(stream: TokenStream) : (ASTNode * TokenStream) =
         let spanStart = GetStartPosition stream
