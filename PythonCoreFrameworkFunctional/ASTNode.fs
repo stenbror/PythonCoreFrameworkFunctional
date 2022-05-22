@@ -66,6 +66,7 @@ type ASTNode =
     |   PowerKey of uint * uint * Token * ASTNode
     |   DictionaryContainer of uint * uint * ASTNode array * Token array
     |   DictiionaryEntry of uint * uint * ASTNode * Token * ASTNode
+    |   SetContainer of uint * uint * ASTNode array * Token array
     
     |   EvalInput of uint * uint * ASTNode * Token array * Token
     

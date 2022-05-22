@@ -648,7 +648,102 @@ module PythonCoreExpressionParser =
                   left, rest3
         
     and ParseDictorSetMaker(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        let mutable key = ASTNode.Empty
+        let mutable symbol = Token.Empty
+        let mutable value = ASTNode.Empty
+        let mutable isDictionary = true
+        let mutable rest = stream
+        
+        match TryToken rest with
+        |   Some(Token.PyMul( _ , _ , _ ), _ ) ->
+                isDictionary <- false
+                let node, rest2 = ParseStarExpr rest
+                key <- node
+                rest <- rest2
+        |   Some(Token.PyPower( _ , _ , _ ), rest2 ) ->
+                let spanStart2 = GetStartPosition rest
+                let op1 = List.head rest
+                let node2, rest4 = ParseTest rest
+                rest <- rest4
+                key <- PowerKey(spanStart2, GetStartPosition rest, op1, node2) 
+        |   _ ->
+                let node3, rest5 = ParseTest rest
+                key <- node3
+                rest <- rest5
+                match TryToken rest with
+                |   Some(Token.PyColon( _ , _ , _ ), rest6 ) ->
+                        let op1 = List.head rest
+                        let node4, rest7 = ParseTest rest6
+                        rest <- rest7
+                        value <- node4
+                        key <- DictiionaryEntry(spanStart, GetStartPosition rest, key, op1, value)
+                |   _ ->  isDictionary <- false
+                
+        let mutable nodes : ASTNode List = List.Empty
+        let mutable separators : Token List = List.Empty
+        nodes <- key :: nodes
+        
+        match TryToken rest with
+        |   Some(Token.PyFor( _ , _ , _ ), _ )
+        |   Some(Token.PyAsync( _ , _ , _ ), _ ) ->
+                let node3, rest8 = ParseCompFor rest
+                nodes <- node3 :: nodes
+                rest <- rest8
+        |   _ ->
+                match isDictionary with
+                |   true ->
+                        while   match TryToken rest with
+                                |   Some(Token.PyComma( _ , _ , _ ), rest20 ) ->
+                                        let op2 = List.head rest
+                                        separators <- op2 :: separators
+                                        rest <- rest20
+                                        match TryToken rest with
+                                        |   Some(Token.PyRightCurly( _ , _ , _ ), _ ) -> false
+                                        |   Some(Token.PyComma( _ , _ , _ ), _ ) ->
+                                                raise (SyntaxError(GetStartPosition rest, "Unexpected ',' in dictionary!"))
+                                        |   Some(Token.PyPower( _ , _ , _ ), rest21 ) ->
+                                                let spanStart3 = GetStartPosition rest
+                                                let op3 = List.head rest
+                                                let node5, rest22 = ParseTest rest21
+                                                nodes <- ASTNode.PowerKey(spanStart3, GetStartPosition rest21, op3, node5) :: nodes
+                                                rest <- rest22
+                                                true
+                                        |   _ ->
+                                                let node6, rest23 = ParseTest rest
+                                                match TryToken rest23 with
+                                                |   Some(Token.PyColon( _ , _ , _ ), rest24 ) ->
+                                                        let op5 = List.head rest23
+                                                        let node7, rest25 = ParseTest rest24
+                                                        rest <- rest25
+                                                        nodes <- DictiionaryEntry(spanStart, GetStartPosition rest, node6, op5, node7) :: nodes
+                                                        true
+                                                |   _ ->  raise (SyntaxError(GetStartPosition rest23, "Expecting ':' in dictionary entry!"))
+                                |   _ ->        false
+                            do ()
+                |   _ ->
+                        while   match TryToken rest with
+                                |   Some(Token.PyComma( _ , _ , _ ), rest10 ) ->
+                                        let op1 = List.head rest
+                                        separators <- op1 :: separators
+                                        rest <- rest10
+                                        match TryToken rest with
+                                        |   Some(Token.PyRightCurly( _ , _ , _ ), _ ) -> false
+                                        |   Some(Token.PyComma( _ , _ , _ ), _ ) ->
+                                                raise (SyntaxError(GetStartPosition rest, "Unexpected ',' in set!"))
+                                        |   _ ->
+                                                let node4, rest11 = match TryToken rest with
+                                                                    |   Some(Token.PyMul( _ , _ , _ ), _ ) ->  ParseStarExpr rest
+                                                                    |   _ ->  ParseTest rest
+                                                nodes <- node4 :: nodes
+                                                rest <- rest11
+                                                true
+                                |   _ -> false
+                            do ()
+        
+        match isDictionary with
+        |    true ->    DictionaryContainer(spanStart, GetStartPosition rest, List.toArray(List.rev nodes), List.toArray(List.rev separators)), rest
+        |    _ ->       SetContainer(spanStart, GetStartPosition rest, List.toArray(List.rev nodes), List.toArray(List.rev separators)), rest
         
     and ParseCompIter(stream: TokenStream) : (ASTNode * TokenStream) =
         match TryToken stream with
