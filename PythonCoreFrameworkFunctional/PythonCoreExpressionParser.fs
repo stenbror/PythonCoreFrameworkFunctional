@@ -1,6 +1,5 @@
 namespace PythonCoreFrameworkFunctional
 
-open System.IO
 open PythonCoreFrameworkFunctional.ParserUtilities
 
 module PythonCoreExpressionParser =
