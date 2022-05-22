@@ -13,6 +13,7 @@ type ASTNode =
     |   Tuple of uint * uint * Token * ASTNode * Token
     |   List of uint * uint * Token * ASTNode * Token
     |   Dictionary of uint * uint * Token * ASTNode * Token
+    |   Set of uint * uint * Token * ASTNode * Token
     |   AtomExpr of uint * uint * Token * ASTNode * ASTNode array
     |   Power of uint * uint * ASTNode * Token * ASTNode
     |   UnaryPlus of uint * uint * Token * ASTNode
@@ -62,6 +63,9 @@ type ASTNode =
     |   DotName of uint * uint * Token * Token
     |   CallExpression of uint * uint * Token * ASTNode * Token
     |   IndexExpression of uint * uint * Token * ASTNode * Token
+    |   PowerKey of uint * uint * Token * ASTNode
+    |   DictionaryContainer of uint * uint * ASTNode array * Token array
+    |   DictiionaryEntry of uint * uint * ASTNode * Token * ASTNode
     
     |   EvalInput of uint * uint * ASTNode * Token array * Token
     

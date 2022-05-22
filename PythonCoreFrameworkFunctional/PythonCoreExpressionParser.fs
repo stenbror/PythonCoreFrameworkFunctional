@@ -373,7 +373,12 @@ module PythonCoreExpressionParser =
         ASTNode.Empty, stream
         
     and ParseVFPDef(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        |   Some(Token.Name( _ , _ , _ , _ ), rest ) ->
+                let name = List.head stream
+                ASTNode.Name(spanStart, GetStartPosition rest, name) , rest
+        |   _ ->   raise (SyntaxError(GetStartPosition stream, "Expecting Name literal in list!"))
         
     and ParseTestNoCond(stream: TokenStream) : (ASTNode * TokenStream) =
         match TryToken stream with
