@@ -47,7 +47,15 @@ module PythonCoreExpressionParser =
                 |   Some(Token.PyRightParen( _ , _ , _ ), rest2) ->
                         let op2 = List.head rest
                         ASTNode.Tuple(spanStart, GetStartPosition(rest2), op1, ASTNode.Empty, op2), rest2
-                |   _ ->        ASTNode.Empty, rest // TODO Fix later!
+                |   _ ->
+                        let node10, rest10 =    match TryToken rest with
+                                                |   Some(Token.PyYield( _ , _ , _ ), _ ) -> ParseYieldExpr rest
+                                                |   _ ->  ParseTestListComp rest
+                        match TryToken rest10 with
+                        |   Some(Token.PyRightParen( _ , _ , _ ), rest11) ->
+                                let op2 = List.head rest10
+                                ASTNode.Tuple(spanStart, GetStartPosition rest11, op1, node10, op2), rest11
+                        |   _ ->   raise (SyntaxError(GetStartPosition rest10, "Expecting ')' in tuple!"))
         |   Some(Token.PyLeftBracket(s, e, _ ), rest) ->
                 let spanStart = GetStartPosition(stream)
                 let op1 = List.head stream
@@ -55,7 +63,13 @@ module PythonCoreExpressionParser =
                 |   Some(Token.PyRightBracket( _ , _ , _ ), rest2) ->
                         let op2 = List.head rest
                         ASTNode.List(spanStart, GetStartPosition(rest2), op1, ASTNode.Empty, op2), rest2
-                |   _ ->        ASTNode.Empty, rest // TODO Fix later!
+                |   _ ->
+                        let node20, rest12 = ParseTestListComp rest
+                        match TryToken rest12 with
+                        |   Some(Token.PyRightBracket( _ , _ , _ ), rest13) ->
+                                let op2 = List.head rest12
+                                ASTNode.List(spanStart, GetStartPosition rest13, op1, node20, op2), rest13
+                        |   _ ->  raise (SyntaxError(GetStartPosition rest12, "Expecting ']' in list!"))
         |   Some(Token.PyLeftCurly(s, e, _ ), rest) ->
                 let spanStart = GetStartPosition(stream)
                 let op1 = List.head stream
@@ -63,7 +77,23 @@ module PythonCoreExpressionParser =
                 |   Some(Token.PyRightCurly( _ , _ , _ ), rest2) ->
                         let op2 = List.head rest
                         ASTNode.Dictionary(spanStart, GetStartPosition(rest2), op1, ASTNode.Empty, op2), rest2
-                |   _ ->        ASTNode.Empty, rest // TODO Fix later!
+                |   _ ->
+                        let node30, rest15 = ParseDictorSetMaker rest
+                        match node30 with
+                        |   DictionaryContainer( _ , _ , _ , _ ) ->
+                                match TryToken rest15 with
+                                |   Some(Token.PyRightCurly( _, _ , _ ), rest16) ->
+                                        let op2 = List.head rest15
+                                        ASTNode.Dictionary(spanStart, GetStartPosition rest16, op1, node30, op2), rest16
+                                |   _ ->  raise (SyntaxError(GetStartPosition rest15, "Expecting '}' in dictionary!"))
+                        |   SetContainer( _ , _ , _ , _) ->
+                                match TryToken rest15 with
+                                |   Some(Token.PyRightCurly( _ , _ , _ ), rest17) ->
+                                        let op2 = List.head rest15
+                                        ASTNode.Set(spanStart, GetStartPosition rest17, op1, node30, op2), rest17
+                                |   _ ->  raise (SyntaxError(GetStartPosition rest15, "Expecting '}' in set!"))
+                        |   _ ->
+                                raise (SyntaxError(GetStartPosition rest, "Expecting dictionary or set!"))      
         |   _   ->  raise ( SyntaxError(GetStartPosition(stream), "Expecting an atom literal!") )
 
     and ParseAtomExpr(stream: TokenStream) : (ASTNode * TokenStream) =
@@ -77,14 +107,24 @@ module PythonCoreExpressionParser =
                       |  _ -> Token.Empty
         let right, rest2 = ParseAtom restAgain // This is the Atom rule.
         let mutable trailerList : ASTNode list = []
-        // TODO Handle trailers here later
-    
+        
+        restAgain <- rest2
+        while   match TryToken restAgain with
+                |   Some(Token.PyLeftParen( _ , _ , _ ), _ )
+                |   Some(Token.PyLeftBracket( _ , _ , _ ), _ )
+                |   Some(Token.PyDot( _ , _ , _ ), _ ) ->
+                        let node5, rest5 = ParseTrailer restAgain
+                        restAgain <- rest5
+                        trailerList <- node5 :: trailerList
+                        true
+                |   _ -> false
+            do ()
     
         match awaitOp, trailerList with
         |   Token.Empty, [] ->
                 right, rest2
-        |   _  -> // TOIDO Fix rest2 with correct token stream
-                ASTNode.AtomExpr(spanStart, GetStartPosition(rest2), awaitOp, right, List.toArray(List.rev trailerList)), rest2
+        |   _  ->
+                ASTNode.AtomExpr(spanStart, GetStartPosition(rest2), awaitOp, right, List.toArray(List.rev trailerList)), restAgain
 
     and ParsePower(stream: TokenStream) : (ASTNode * TokenStream) =
         let spanStart = GetStartPosition(stream)
