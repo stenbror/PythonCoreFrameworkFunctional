@@ -412,7 +412,43 @@ module PythonCoreExpressionParser =
              left, rest
              
     and ParseTestListComp(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        let mutable nodes : ASTNode List = List.Empty
+        let mutable separators : Token List = List.Empty
+        let node, rest = match TryToken stream with
+                         |   Some(Token.PyMul( _ , _ , _ ), _ ) -> ParseStarExpr stream
+                         |   _ ->   ParseNamedExpr stream
+        nodes <- node :: nodes
+        let mutable rest2 = rest
+        match TryToken rest2 with
+        |   Some(Token.PyFor( _ , _ , _ ), _ )
+        |   Some(Token.PyAsync( _ , _ , _ ), _ ) ->
+                let node2, rest3 = ParseCompFor rest2
+                nodes <- node2 :: nodes
+                rest2 <- rest3
+        |   _ ->
+                while   match TryToken rest2 with
+                        |  Some(Token.PyComma( _ , _ , _ ), rest4 ) ->
+                              separators <- List.head rest :: separators
+                              match TryToken rest4 with
+                              |  Some(Token.PyRightParen( _ , _ , _ ), _ )
+                              |  Some(Token.PyRightBracket( _ , _ , _ ), _ ) ->
+                                    rest2 <- rest4
+                                    false
+                              |  Some(Token.PyComma( _ , _ , _ ), _ ) ->
+                                    raise (SyntaxError(GetStartPosition rest4, "Unexpected ',' in list!"))
+                              |  _ ->
+                                    let node2, rest5 =
+                                           match TryToken rest4 with
+                                           |   Some(Token.PyMul( _ , _ , _ ), _ ) -> ParseStarExpr stream
+                                           |   _ ->   ParseNamedExpr stream
+                                    rest2 <- rest5
+                                    nodes <- node2 :: nodes
+                                    true
+                        |   _ -> false
+                   do ()
+        ASTNode.TestList(spanStart, GetStartPosition rest2, List.toArray(List.rev nodes),
+                         List.toArray(List.rev separators)), rest2
         
     and ParseTrailer(stream: TokenStream) : (ASTNode * TokenStream) =
         let spanStart = GetStartPosition stream
