@@ -443,12 +443,43 @@ module PythonCoreExpressionParser =
     and ParseSubscript(stream: TokenStream) : (ASTNode * TokenStream) =
         let spanStart = GetStartPosition stream
         let mutable first = ASTNode.Empty
-        let op1 = Token.Empty
+        let mutable op1 = Token.Empty
         let mutable second = ASTNode.Empty
-        let op2 = Token.Empty
+        let mutable op2 = Token.Empty
         let mutable third = ASTNode.Empty
         let mutable rest = stream
-        
+        match TryToken rest with
+        |   Some(Token.PyColon( _ , _ , _ ), _ ) ->  ()
+        |   _ ->
+                let node1, rest1 = ParseTest rest
+                first <- node1
+                rest <- rest1
+        match TryToken rest with
+        |  Some(Token.PyColon( _ , _ , _ ), rest2 ) ->
+                op1 <- List.head rest
+                rest <- rest2 
+                match TryToken rest with 
+                |   Some(Token.PyColon( _ , _ , _ ), _ )
+                |   Some(Token.PyComma( _ , _ , _ ), _ )
+                |   Some(Token.PyRightBracket( _ , _ , _ ), _ ) -> ()
+                |  _ ->
+                    let node2, rest3 = ParseTest rest
+                    second <- node2
+                    rest <- rest3
+                match TryToken rest with
+                |   Some(Token.PyColon( _ , _ , _ ), rest4 ) ->
+                        op2 <- List.head rest
+                        rest <- rest4
+                        match TryToken rest with
+                        |   Some(Token.PyComma( _ , _ , _ ), _ )
+                        |   Some(Token.PyRightBracket( _ , _ , _ ), _ ) ->
+                                ()
+                        |   _ ->
+                                let node3, rest5 = ParseTest rest
+                                third <- node3
+                                rest <- rest5
+                |   _ ->  ()
+        |  _ -> ()
         ASTNode.Subscript(spanStart, GetStartPosition rest, first, op1, second, op2, third ), rest
         
     and ParseExprList(stream: TokenStream) : (ASTNode * TokenStream) =
