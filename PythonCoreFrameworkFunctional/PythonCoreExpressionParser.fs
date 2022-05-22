@@ -415,7 +415,33 @@ module PythonCoreExpressionParser =
         ASTNode.Empty, stream
         
     and ParseTrailer(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        let symbol1 = List.head stream
+        match TryToken stream with
+        |   Some(Token.PyDot( _ , _ , _ ), rest ) ->
+                match TryToken rest with
+                |   Some(Token.Name( _ , _ , _ , _ ), rest2 ) ->
+                        let name = List.head rest
+                        ASTNode.DotName(spanStart, GetStartPosition rest2, symbol1, name), rest2
+                |   _ ->   raise ( SyntaxError(GetStartPosition rest, "Expecting Name literal after '.'!") )
+        |   Some(Token.PyLeftParen( _ , _ , _ ), rest ) ->
+                let node, rest2 =
+                        match TryToken rest with
+                        |   Some(Token.PyRightParen( _ , _ , _ ), _ ) -> ASTNode.Empty, rest
+                        |   _ ->  ParseArgList rest
+                match TryToken rest2 with
+                |    Some(Token.PyRightParen( _ , _ , _ ), rest3) ->
+                        let symbol2 = List.head rest2
+                        ASTNode.CallExpression(spanStart, GetStartPosition rest2, symbol1, node, symbol2), rest3
+                |    _ ->   raise( SyntaxError(GetStartPosition rest2, "Expecting ')' in call!") )
+        |   Some(Token.PyLeftBracket( _ , _ , _ ), rest ) ->
+                let node, rest2 = ParseSubscriptList rest
+                match TryToken rest2 with
+                |    Some(Token.PyRightBracket( _ , _ , _ ), rest3) ->
+                        let symbol2 = List.head rest2
+                        ASTNode.IndexExpression(spanStart, GetStartPosition rest2, symbol1, node, symbol2), rest3
+                |    _ ->   raise( SyntaxError(GetStartPosition rest2, "Expecting ']' in indexer!") )
+        |   _ ->   ASTNode.Empty, stream
         
     and ParseSubscriptList(stream: TokenStream) : (ASTNode * TokenStream) =
         let spanStart = GetStartPosition stream

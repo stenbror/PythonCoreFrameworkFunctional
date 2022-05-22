@@ -59,6 +59,9 @@ type ASTNode =
     |   Argument of uint * uint * ASTNode * Token * ASTNode
     |   SubscriptList of uint * uint * ASTNode array * Token array
     |   Subscript of uint * uint * ASTNode * Token * ASTNode * Token * ASTNode
+    |   DotName of uint * uint * Token * Token
+    |   CallExpression of uint * uint * Token * ASTNode * Token
+    |   IndexExpression of uint * uint * Token * ASTNode * Token
     
     |   EvalInput of uint * uint * ASTNode * Token array * Token
     
