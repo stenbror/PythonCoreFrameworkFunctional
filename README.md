@@ -1,6 +1,6 @@
 # PythonCoreFrameworkFunctional
 
-For now this only support parsing og EvalInput start rule for expression handling in Python 3.10 grammar.
+For now this only support parsing from EvalInput start rule for expression handling in Python 3.10 grammar.
 
 Example:
 
