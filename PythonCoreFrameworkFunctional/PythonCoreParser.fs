@@ -1,7 +1,6 @@
 namespace PythonCoreFrameworkFunctional
 
 open PythonCoreFrameworkFunctional.ParserUtilities
-open PythonCoreFrameworkFunctional
 
 module PythonCoreParser =
     
@@ -36,7 +35,7 @@ module PythonCoreParser =
            do ()
         match TryToken restAgain with
         |   Some(Token.EOF( _ ), _ ) ->
-                ASTNode.Empty
+                ASTNode.FuncTypeInput(spanStart, GetStartPosition restAgain, left, List.toArray(List.rev newlines), List.head restAgain)
         |  _ ->  raise (SyntaxError(GetStartPosition restAgain, "Expecting end of file!"))
         
     let ParseFileInput(stream: TokenStream) : ASTNode =

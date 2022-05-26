@@ -1,6 +1,8 @@
 
 namespace PythonCoreFrameworkFunctional
 
+open PythonCoreFrameworkFunctional
+
 type ASTNode =
     |   Empty
     |   False of uint * uint * Token
@@ -70,4 +72,7 @@ type ASTNode =
     |   VarArgsList of uint * uint * Token * ASTNode * Token * ASTNode * ASTNode array * Token array
     |   VFPDefAssign of uint * uint * ASTNode * Token * ASTNode
     |   EvalInput of uint * uint * ASTNode * Token array * Token
+    |   FuncTypeInput of uint * uint * ASTNode * Token array * Token
+    |   FuncType of uint * uint * Token * ASTNode * Token * Token * ASTNode
+    |   TypeList of uint * uint * Token * ASTNode * Token * ASTNode * ASTNode array * Token array
     
