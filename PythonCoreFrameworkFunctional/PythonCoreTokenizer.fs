@@ -74,6 +74,26 @@ type Token =
     |   PySemiColon of uint * uint * Trivia array
     |   PyFor of uint * uint * Trivia array
     |   PyAsync of uint * uint * Trivia array
+    |   PyAs of uint * uint * Trivia array
+    |   PyAssert of uint * uint * Trivia array
+    |   PyBreak of uint * uint * Trivia array
+    |   PyClass of uint * uint * Trivia array
+    |   PyContinue of uint * uint * Trivia array
+    |   PyDef of uint * uint * Trivia array
+    |   PyDel of uint * uint * Trivia array
+    |   PyElif of uint * uint * Trivia array
+    |   PyExcept of uint * uint * Trivia array
+    |   PyFinally of uint * uint * Trivia array
+    |   PyGlobal of uint * uint * Trivia array
+    |   PyImport of uint * uint * Trivia array
+    |   PyNonLocal of uint * uint * Trivia array
+    |   PyPass of uint * uint * Trivia array
+    |   PyRaise of uint * uint * Trivia array
+    |   PyReturn of uint * uint * Trivia array
+    |   PyTry of uint * uint * Trivia array
+    |   PyWhile of uint * uint * Trivia array
+    |   PyWith of uint * uint * Trivia array
+    
     static member GetStartPosition(symbol: Token) : uint =
         match symbol with
         |   EOF(s)
@@ -140,9 +160,69 @@ type Token =
         |   PyPowerAssign(s, _ , _ )
         |   PyAssign(s, _ , _ )
         |   PyAsync(s, _ , _ )
-        |   PyFor(s, _ , _ ) -> s
+        |   PyFor(s, _ , _ )
+        |   PyAs(s, _ , _ )
+        |   PyAssert(s, _ , _ )
+        |   PyBreak(s, _ , _ )
+        |   PyClass(s, _ , _ )
+        |   PyContinue(s, _ , _ )
+        |   PyDef(s, _ , _ )
+        |   PyDel(s, _ , _ ) 
+        |   PyElif(s, _ , _ )
+        |   PyExcept(s, _ , _ )
+        |   PyFinally(s, _ , _ )
+        |   PyGlobal(s, _ , _ )
+        |   PyImport(s, _ , _ )
+        |   PyNonLocal(s, _ , _ )
+        |   PyPass(s, _ , _ )
+        |   PyRaise(s, _ , _ )
+        |   PyReturn(s, _ , _ )
+        |   PyTry(s, _ , _ )
+        |   PyWhile(s, _ , _ )
+        |   PyWith(s, _ , _ ) -> s
         |   _   ->  0u
         
 type TokenStream = Token list
 
-module PythonCoreTokenizer = ()
+module PythonCoreTokenizer =
+    
+    let Keywords =
+        [
+            ( "and", Token.PyAnd )
+            ( "as", Token.PyAs )
+            ( "assert", Token.PyAssert )
+            ( "async", Token.PyAsync )
+            ( "await", Token.PyAwait )
+            ( "break", Token.PyBreak )
+            ( "class", Token.PyClass )
+            ( "continue", Token.PyContinue )
+            ( "def", Token.PyDef )
+            ( "del", Token.PyDel )
+            ( "elif", Token.PyElif )
+            ( "else", Token.PyElse )
+            ( "except", Token.PyExcept )
+            ( "finally", Token.PyFinally )
+            ( "for", Token.PyFor )
+            ( "from", Token.PyFrom )
+            ( "global", Token.PyGlobal )
+            ( "if", Token.PyIf )
+            ( "import", Token.PyImport )
+            ( "in", Token.PyIn )
+            ( "is", Token.PyIs )
+            ( "lambda", Token.PyLambda )
+            ( "nonlocal", Token.PyNonLocal )
+            ( "not", Token.PyNot )
+            ( "or", Token.PyOr )
+            ( "pass", Token.PyPass )
+            ( "raise", Token.PyRaise )
+            ( "return", Token.PyReturn )
+            ( "try", Token.PyTry )
+            ( "while", Token.PyWhile )
+            ( "with", Token.PyWith )
+            ( "yield", Token.PyYield )
+            ( "False", Token.PyFalse )
+            ( "None", Token.PyNone )
+            ( "True", Token.PyTrue )
+        ] |> Map.ofList
+        
+    
