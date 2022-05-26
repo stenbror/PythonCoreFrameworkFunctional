@@ -10,6 +10,7 @@
         <Compile Include="ASTNode.fs" />
         <Compile Include="ParserUtillites.fs" />
         <Compile Include="PythonCoreExpressionParser.fs" />
+        <Compile Include="PythonCoreFunctionParser.fs" />
         <Compile Include="PythonCoreParser.fs" />
     </ItemGroup>
 
