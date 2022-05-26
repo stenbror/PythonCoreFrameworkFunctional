@@ -1641,3 +1641,24 @@ module ExpressionsRulesTests =
               , node)
          
          Assert.True(rest.Length = 2)
+         
+         
+         
+    [<Fact>]
+    let ```Test`integration between toklenizer and parser`` () =
+         let node = "a and b or c" |> PythonCoreTokenizer.TokenizeFromString |> PythonCoreParser.ParseEvalInput
+         
+         Assert.Equal( ASTNode.EvalInput(0u, 12u, 
+                                   ASTNode.TestList(0u, 12u,
+                                   [|
+                                        ASTNode.OrTest(0u, 12u,
+                                                       ASTNode.AndTest(0u, 8u,
+                                                                       ASTNode.Name(0u, 1u, Token.Name(0u, 1u, "a", [|  |])),
+                                                                       Token.PyAnd(2u, 5u, [| Trivia.WhiteSpace(1u, 2u) |]),
+                                                                       ASTNode.Name(6u, 7u, Token.Name(6u, 7u, "b", [| Trivia.WhiteSpace(5u, 6u) |] ))),
+                                                       Token.PyOr(8u, 10u, [| Trivia.WhiteSpace(7u, 8u) |]),
+                                                       ASTNode.Name(11u, 12u, Token.Name(11u, 12u, "c", [| Trivia.WhiteSpace(10u, 11u) |])))        
+                                   |], [|  |]),
+                                   [|  |],
+                                   Token.EOF(12u) ), node)
+    
