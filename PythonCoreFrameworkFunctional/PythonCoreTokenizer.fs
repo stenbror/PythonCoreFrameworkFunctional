@@ -225,4 +225,23 @@ module PythonCoreTokenizer =
             ( "True", Token.PyTrue )
         ] |> Map.ofList
         
-    
+    type TokenizerStack<'T> =
+        |  Empty
+        |  Stack of 'T * TokenizerStack<'T>
+        
+        member s.Push x = Stack(x, s)
+        
+        member s.Pop =
+            match s with
+            |  Empty -> failwith "Underflow"
+            |  Stack( t, _ ) -> t
+            
+        member s.Rest =
+            match s with
+            |  Empty -> Empty
+            |  Stack( _ , r ) -> r
+            
+        member s.IEmpty =
+            match s with
+            |  Empty -> true
+            |  _ -> false
