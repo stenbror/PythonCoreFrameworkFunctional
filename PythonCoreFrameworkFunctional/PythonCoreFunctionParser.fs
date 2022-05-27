@@ -1,5 +1,7 @@
 namespace PythonCoreFrameworkFunctional
 
+open System
+open System.Security
 open PythonCoreFrameworkFunctional.ParserUtilities
 
 module PythonCoreFunctionParser =
@@ -26,4 +28,85 @@ module PythonCoreFunctionParser =
         
     and ParseTypeList(stream: TokenStream) : (ASTNode * TokenStream) =
         let spanStart = GetStartPosition stream
-        ASTNode.Empty, stream
+        let mutable nodes : ASTNode List = List.Empty
+        let mutable separators : Token List = List.Empty
+        let mutable mulOp = Token.Empty
+        let mutable mulNode = ASTNode.Empty
+        let mutable powerOp = Token.Empty
+        let mutable powerNode = ASTNode.Empty
+        let mutable restAgain = stream
+        
+        match TryToken restAgain with
+        |   Some(Token.PyPower( _ , _ , _ ), rest ) ->
+                powerOp <- List.head restAgain
+                let elem, rest2 = PythonCoreExpressionParser.ParseTest rest
+                powerNode <- elem
+                restAgain <- rest2
+        |   Some(Token.PyMul( _ , _ , _ ), rest ) ->
+                mulOp <- List.head restAgain
+                let elem, rest2 = PythonCoreExpressionParser.ParseTest rest
+                mulNode <- elem
+                restAgain <- rest2
+                while   match TryToken restAgain with
+                        |   Some(Token.PyComma( _ , _ , _ ), rest3 ) ->
+                                separators <- List.head restAgain :: separators
+                                match TryToken rest3 with
+                                |   Some(Token.PyPower( _ , _ , _ ), _ ) ->
+                                        powerOp <- List.head rest3
+                                        let elem, rest2 = PythonCoreExpressionParser.ParseTest rest
+                                        powerNode <- elem
+                                        restAgain <- rest2
+                                        false
+                                |   _ ->
+                                    let elem2, rest4 = PythonCoreExpressionParser.ParseTest rest3
+                                    nodes <- elem2 :: nodes
+                                    restAgain <- rest4
+                                    true
+                        |   _ -> false
+                    do ()
+        |   _ ->
+                let node, rest = PythonCoreExpressionParser.ParseTest restAgain
+                nodes <- node :: nodes
+                restAgain <- rest
+                while   match TryToken restAgain with
+                        |   Some(Token.PyComma( _ , _ , _ ), rest2 ) ->
+                                separators <- List.head restAgain :: separators
+                                restAgain <- rest2
+                                match TryToken restAgain with
+                                |   Some(Token.PyRightParen( _ , _ , _ ), _ ) -> false
+                                |   Some(Token.PyPower( _ , _ , _ ), rest ) ->
+                                        powerOp <- List.head restAgain
+                                        let elem, rest2 = PythonCoreExpressionParser.ParseTest rest
+                                        powerNode <- elem
+                                        restAgain <- rest2
+                                        false
+                                |   Some(Token.PyMul( _ , _ , _ ), rest ) ->
+                                        mulOp <- List.head restAgain
+                                        let elem, rest2 = PythonCoreExpressionParser.ParseTest rest
+                                        mulNode <- elem
+                                        restAgain <- rest2
+                                        while   match TryToken restAgain with
+                                                |   Some(Token.PyComma( _ , _ , _ ), rest3 ) ->
+                                                        separators <- List.head restAgain :: separators
+                                                        match TryToken rest3 with
+                                                        |   Some(Token.PyPower( _ , _ , _ ), _ ) ->
+                                                                powerOp <- List.head rest3
+                                                                let elem, rest2 = PythonCoreExpressionParser.ParseTest rest
+                                                                powerNode <- elem
+                                                                restAgain <- rest2
+                                                                false
+                                                        |   _ ->
+                                                            let elem2, rest4 = PythonCoreExpressionParser.ParseTest rest3
+                                                            nodes <- elem2 :: nodes
+                                                            restAgain <- rest4
+                                                            true
+                                                |   _ -> false
+                                            do ()
+                                        false
+                                |   _ ->
+                                        false      
+                        |   _ -> false
+                    do ()
+        
+        ASTNode.TypeList(spanStart, GetStartPosition restAgain, mulOp, mulNode, powerOp, powerNode,
+                         List.toArray(List.rev nodes), List.toArray(List.rev separators)), restAgain
