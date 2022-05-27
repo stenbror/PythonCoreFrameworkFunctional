@@ -1,7 +1,5 @@
 namespace PythonCoreFrameworkFunctional
 
-open System
-open System.Security
 open PythonCoreFrameworkFunctional.ParserUtilities
 
 module PythonCoreFunctionParser =
