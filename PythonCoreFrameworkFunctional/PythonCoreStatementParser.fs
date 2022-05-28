@@ -18,8 +18,39 @@ module PythonCoreStatementParser =
         |   Some(Token.PyMatrice( _ , _ , _ ), _ ) ->    ParseCompound (stream, flows)
         |   _ ->   ParseSimpleStmt (stream, flows)
         
-    and ParseSimpleStmt(stream: TokenStream, lows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
-        ASTNode.Empty, stream, (0u, 0u)
+    and ParseSimpleStmt(stream: TokenStream, flows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
+        let spanStart = GetStartPosition stream
+        let mutable nodes : ASTNode List = List.Empty
+        let mutable separeators : Token List = List.Empty
+        let mutable restAgain = stream
+        let mutable flowsAgain = flows
+        
+        let node, rest5, flows2 = ParseSmallStmt(restAgain, flowsAgain)
+        nodes <- node :: nodes
+        restAgain <- rest5
+        flowsAgain <- flows2
+        
+        while   match TryToken restAgain with
+                |   Some(Token.PySemiColon( _ , _ , _ ), rest6 ) ->
+                        separeators <- List.head restAgain :: separeators
+                        match TryToken rest6 with
+                        |   Some(Token.Newline( _ , _ , _ , _ , _ ), _ ) -> false
+                        |   _ ->
+                                let node, rest7, flows3 = ParseSmallStmt(rest6, flowsAgain)
+                                nodes <- node :: nodes
+                                restAgain <- rest7
+                                flowsAgain <- flows3
+                                true
+                |   _ -> false
+            do ()
+        
+        let op, rest3 =     match TryToken restAgain with
+                            |   Some(Token.Newline( _ , _ , _ , _ , _ ), rest4 ) -> List.head restAgain, rest4
+                            |   _ ->    raise (SyntaxError(GetStartPosition restAgain, "Expecting Newline!"))
+        restAgain <- rest3
+        
+        ASTNode.SimpleStmt(spanStart, GetStartPosition restAgain, List.toArray(List.rev nodes),
+                           List.toArray(List.rev separeators), op), restAgain, flowsAgain
 
     and ParseSmallStmt(stream: TokenStream, flows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
         ASTNode.Empty, stream, (0u, 0u)

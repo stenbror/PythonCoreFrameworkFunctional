@@ -75,7 +75,7 @@ type ASTNode =
     |   FuncTypeInput of uint * uint * ASTNode * Token array * Token
     |   FuncType of uint * uint * Token * ASTNode * Token * Token * ASTNode
     |   TypeList of uint * uint * Token * ASTNode * Token * ASTNode * ASTNode array * Token array
-    
+    |   SimpleStmt of uint * uint * ASTNode array * Token array * Token
     |   DelStmt of uint * uint * Token * ASTNode
     |   PassStmt of uint * uint * Token
     |   BreakStmt of uint * uint * Token
