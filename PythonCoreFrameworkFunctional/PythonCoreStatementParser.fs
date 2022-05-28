@@ -79,10 +79,24 @@ module PythonCoreStatementParser =
         |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expecting 'continue' in continue statement!"))
         
     and ParseReturn(stream: TokenStream, flows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
-        ASTNode.Empty, stream, (0u, 0u)
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        |   Some(Token.PyReturn( _ , _ , _ ), rest ) ->
+                let op = List.head stream
+                let node, rest2 =   match TryToken rest with
+                                    |   Some(Token.Newline( _ , _ , _ , _  , _ ), _ )
+                                    |   Some(Token.EOF( _ ), _ )
+                                    |   Some(Token.PySemiColon( _ , _ , _ ), _ ) -> ASTNode.Empty, rest
+                                    |   _ ->    PythonCoreExpressionParser.ParseTestListStarExpr rest
+                ASTNode.ReturnStmt(spanStart, GetStartPosition rest2, op, node), rest2, flows
+        |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expecting 'return' in return statement!"))
         
     and ParseYield(stream: TokenStream, flows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
-        ASTNode.Empty, stream, (0u, 0u)
+        match TryToken stream with
+        |   Some(Token.PyYield( _ , _ , _ ), _ ) ->
+                let node, rest = PythonCoreExpressionParser.ParseYieldExpr stream
+                node, rest, flows
+        |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expecting 'yield' in yield statement!"))
         
     and ParseRaise(stream: TokenStream, flows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
         ASTNode.Empty, stream, (0u, 0u)

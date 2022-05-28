@@ -80,4 +80,5 @@ type ASTNode =
     |   PassStmt of uint * uint * Token
     |   BreakStmt of uint * uint * Token
     |   ContinueStmt of uint * uint * Token
+    |   ReturnStmt of uint * uint * Token * ASTNode
     
