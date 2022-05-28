@@ -44,7 +44,26 @@ module PythonCoreStatementParser =
         |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expecting 'pass' in pass statement!"))
         
     and ParseFlow(stream: TokenStream, flows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
-        ASTNode.Empty, stream, (0u, 0u)
+        match TryToken stream with
+        |   Some(Token.PyBreak( _ , _ , _ ), _ ) ->
+                match flows with
+                |   0u, _ -> raise (SyntaxError(GetStartPosition stream, "Found 'break' outside of loop statement!"))
+                |   _ , _ ->    ParseBreak (stream, flows)
+        |   Some(Token.PyContinue( _ , _ , _ ), _ ) ->
+                match flows with
+                |   0u, _ -> raise (SyntaxError(GetStartPosition stream, "Found 'continue' outside loop statement!"))
+                |   _ , _ ->    ParseBreak (stream, flows)
+        |   Some(Token.PyYield( _ , _ , _ ), _ ) ->
+                match flows with
+                |   0u, _ -> raise (SyntaxError(GetStartPosition stream, "Found 'yield' outside loop statement!"))
+                |   _ , _ ->    ParseBreak (stream, flows)
+        |   Some(Token.PyReturn( _ , _ , _ ), _ ) ->
+                match flows with
+                |   _, 0u -> raise (SyntaxError(GetStartPosition stream, "Found 'return' outside of function statement!"))
+                |   _ , _ ->    ParseBreak (stream, flows)
+        |   Some(Token.PyRaise( _ , _ , _ ),  _ ) ->    ParseRaise (stream, flows)
+        |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expected flow statement!"))
+                
         
     and ParseBreak(stream: TokenStream, flows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
         ASTNode.Empty, stream, (0u, 0u)
