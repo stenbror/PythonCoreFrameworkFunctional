@@ -64,12 +64,19 @@ module PythonCoreStatementParser =
         |   Some(Token.PyRaise( _ , _ , _ ),  _ ) ->    ParseRaise (stream, flows)
         |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expected flow statement!"))
                 
-        
     and ParseBreak(stream: TokenStream, flows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
-        ASTNode.Empty, stream, (0u, 0u)
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        |   Some(Token.PyBreak( _ , _ , _ ), rest ) ->
+                ASTNode.BreakStmt(spanStart, GetStartPosition rest, List.head stream), rest, flows
+        |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expecting 'break' in break statement!"))
         
     and ParseContinue(stream: TokenStream, flows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
-        ASTNode.Empty, stream, (0u, 0u)
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        |   Some(Token.PyContinue( _ , _ , _ ), rest ) ->
+                ASTNode.ContinueStmt(spanStart, GetStartPosition rest, List.head stream), rest, flows
+        |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expecting 'continue' in continue statement!"))
         
     and ParseReturn(stream: TokenStream, flows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
         ASTNode.Empty, stream, (0u, 0u)
