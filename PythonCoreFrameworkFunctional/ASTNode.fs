@@ -82,4 +82,19 @@ type ASTNode =
     |   ContinueStmt of uint * uint * Token
     |   ReturnStmt of uint * uint * Token * ASTNode
     |   RaiseStmt of uint * uint * Token * ASTNode * Token * ASTNode
+    |   PlusAssign of uint * uint * ASTNode * Token * ASTNode
+    |   MinusAssign of uint * uint * ASTNode * Token * ASTNode
+    |   MulAssign of uint * uint * ASTNode * Token * ASTNode
+    |   MatriceAssign of uint * uint * ASTNode * Token * ASTNode
+    |   DivAssign of uint * uint * ASTNode * Token * ASTNode
+    |   ModuloAssign of uint * uint * ASTNode * Token * ASTNode
+    |   BitAndAssign of uint * uint * ASTNode * Token * ASTNode
+    |   BitOrAssign of uint * uint * ASTNode * Token * ASTNode
+    |   BitXorAssign of uint * uint * ASTNode * Token * ASTNode
+    |   ShiftLeftAssign of uint * uint * ASTNode * Token * ASTNode
+    |   ShiftRightAssign of uint * uint * ASTNode * Token * ASTNode
+    |   PowerAssign of uint * uint * ASTNode * Token * ASTNode
+    |   FloorDivAssign of uint * uint * ASTNode * Token * ASTNode
+    |   Assign of uint * uint * ASTNode * Token * ASTNode * Token
+    |   Annotation of uint * uint * ASTNode * Token * ASTNode
     
