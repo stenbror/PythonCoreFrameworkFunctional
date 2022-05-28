@@ -1,7 +1,6 @@
 
 namespace PythonCoreFrameworkFunctional.Tests
 
-open System
 open Xunit
 open PythonCoreFrameworkFunctional
 
