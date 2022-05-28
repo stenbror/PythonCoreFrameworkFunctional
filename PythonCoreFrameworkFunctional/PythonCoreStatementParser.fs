@@ -16,7 +16,7 @@ module PythonCoreStatementParser =
         |   Some(Token.PyDef( _ , _ , _ ), _ )
         |   Some(Token.PyAsync( _ , _ , _ ), _ )
         |   Some(Token.PyMatrice( _ , _ , _ ), _ ) ->    ParseCompound (stream, flows)
-        |   _ ->   ParseSmallStmt (stream, flows)
+        |   _ ->   ParseSimpleStmt (stream, flows)
         
     and ParseSimpleStmt(stream: TokenStream, lows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
         ASTNode.Empty, stream, (0u, 0u)
@@ -28,7 +28,13 @@ module PythonCoreStatementParser =
         ASTNode.Empty, stream
         
     and ParseDel(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        |   Some(Token.PyDel( _ , _ , _ ), rest ) ->
+                let op = List.head stream
+                let node, rest2 = PythonCoreExpressionParser.ParseExprList rest
+                ASTNode.DelStmt(spanStart, GetStartPosition rest2, op, node), rest2
+        |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expecting 'del' in del statement!"))
         
     and ParsePass(stream: TokenStream) : (ASTNode * TokenStream) =
         ASTNode.Empty, stream
