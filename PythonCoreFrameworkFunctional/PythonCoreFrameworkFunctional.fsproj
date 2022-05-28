@@ -11,6 +11,7 @@
         <Compile Include="ParserUtillites.fs" />
         <Compile Include="PythonCoreExpressionParser.fs" />
         <Compile Include="PythonCoreFunctionParser.fs" />
+        <Compile Include="PythonCoreMatchParser.fs" />
         <Compile Include="PythonCoreStatementParser.fs" />
         <Compile Include="PythonCoreParser.fs" />
     </ItemGroup>
