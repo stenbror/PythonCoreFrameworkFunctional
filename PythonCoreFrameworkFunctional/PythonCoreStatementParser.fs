@@ -37,7 +37,11 @@ module PythonCoreStatementParser =
         |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expecting 'del' in del statement!"))
         
     and ParsePass(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        |   Some(Token.PyPass( _ , _ , _ ), rest ) ->
+                ASTNode.PassStmt(spanStart, GetStartPosition rest, List.head stream), rest
+        |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expecting 'pass' in pass statement!"))
         
     and ParseFlow(stream: TokenStream, flows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
         ASTNode.Empty, stream, (0u, 0u)

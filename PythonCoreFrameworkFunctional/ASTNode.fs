@@ -77,4 +77,5 @@ type ASTNode =
     |   TypeList of uint * uint * Token * ASTNode * Token * ASTNode * ASTNode array * Token array
     
     |   DelStmt of uint * uint * Token * ASTNode
+    |   PassStmt of uint * uint * Token
     
