@@ -53,7 +53,35 @@ module PythonCoreStatementParser =
                            List.toArray(List.rev separeators), op), restAgain, flowsAgain
 
     and ParseSmallStmt(stream: TokenStream, flows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
-        ASTNode.Empty, stream, (0u, 0u)
+        match TryToken stream with
+        |   Some(Token.PyDel( _ , _ , _ ), _ ) ->
+                let node, rest = ParseDel stream
+                node, rest, flows
+        |   Some(Token.PyPass( _ , _ , _ ), _ ) ->
+                let node, rest = ParsePass stream
+                node, rest, flows
+        |   Some(Token.PyBreak( _ , _ , _ ), _ )
+        |   Some(Token.PyContinue( _ , _ , _ ), _ )
+        |   Some(Token.PyRaise( _ , _ , _ ), _ )
+        |   Some(Token.PyYield( _ , _ , _ ), _ )
+        |   Some(Token.PyReturn( _ , _ , _ ), _ ) ->
+                ParseFlow(stream, flows)
+        |   Some(Token.PyFrom( _ , _ , _ ), _ )
+        |   Some(Token.PyImport( _ , _ , _ ), _ ) ->
+                let node, rest = ParseImport stream
+                node, rest, flows
+        |   Some(Token.PyGlobal( _ , _ , _ ), _ ) ->
+                let node, rest = ParseGlobal stream
+                node, rest, flows
+        |   Some(Token.PyNonLocal( _ , _ , _ ), _ ) ->
+                let node, rest = ParseNonLocal stream
+                node, rest, flows
+        |   Some(Token.PyAssert( _ , _ , _ ), _ ) ->
+                let node, rest = ParseAssert stream
+                node, rest, flows
+        |   _ ->
+                let node, rest = ParseExpr stream
+                node, rest, flows
         
     and ParseExpr(stream: TokenStream) : (ASTNode * TokenStream) =
         ASTNode.Empty, stream
