@@ -5,7 +5,18 @@ open PythonCoreFrameworkFunctional.ParserUtilities
 module PythonCoreStatementParser =
     
     let rec ParseStmt(stream: TokenStream, flows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
-        ASTNode.Empty, stream, (0u, 0u)
+        match TryToken stream with
+        |   Some(Token.Name( _ , _ , "match" , _ ), _ )
+        |   Some(Token.PyIf( _ , _ , _ ), _ ) 
+        |   Some(Token.PyWhile( _ , _ , _ ), _ )
+        |   Some(Token.PyFor( _ , _ , _ ), _ )
+        |   Some(Token.PyWith( _ , _ , _ ), _ ) 
+        |   Some(Token.PyTry( _ , _ , _ ), _ ) 
+        |   Some(Token.PyClass( _ , _ , _ ), _ )
+        |   Some(Token.PyDef( _ , _ , _ ), _ )
+        |   Some(Token.PyAsync( _ , _ , _ ), _ )
+        |   Some(Token.PyMatrice( _ , _ , _ ), _ ) ->    ParseCompound (stream, flows)
+        |   _ ->   ParseSmallStmt (stream, flows)
         
     and ParseSimpleStmt(stream: TokenStream, lows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
         ASTNode.Empty, stream, (0u, 0u)
@@ -74,7 +85,19 @@ module PythonCoreStatementParser =
         ASTNode.Empty, stream
         
     and ParseCompound(stream: TokenStream, flows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
-        ASTNode.Empty, stream, (0u, 0u)
+        match TryToken stream with
+        |   Some(Token.PyIf( _ , _ , _ ), _ ) ->    ParseIf (stream, flows)
+        |   Some(Token.PyWhile( _ , _ , _ ), _ ) -> ParseWhile (stream, flows)
+        |   Some(Token.PyFor( _ , _ , _ ), _ ) ->   ParseFor (stream, flows)
+        |   Some(Token.PyWith( _ , _ , _ ), _ ) ->  ParseWith (stream, flows)
+        |   Some(Token.PyTry( _ , _ , _ ), _ ) ->   ParseTry (stream, flows)
+        |   Some(Token.PyClass( _ , _ , _ ), _ ) -> ParseClass (stream, flows)
+        |   Some(Token.PyDef( _ , _ , _ ), _ ) ->   ParseFuncDef (stream, flows)
+        |   Some(Token.PyAsync( _ , _ , _ ), _ ) -> ParseAsync (stream, flows)
+        |   Some(Token.PyMatrice( _ , _ , _ ), _ ) -> ParseDecorated (stream, flows)
+        |   Some(Token.Name( _ , _ , "match" , _), _ ) ->
+                PythonCoreMatchParser.ParseMatch (stream, flows)
+        |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expecting compound statement!"))
         
     and ParseIf(stream: TokenStream, flows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
         ASTNode.Empty, stream, (0u, 0u)
@@ -99,6 +122,9 @@ module PythonCoreStatementParser =
         
     and ParseWithItem(stream: TokenStream) : (ASTNode * TokenStream) =
         ASTNode.Empty, stream
+        
+    and ParseAsync(stream: TokenStream, flows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
+        ASTNode.Empty, stream, (0u, 0u)
         
     and ParseSuiteExcept(stream: TokenStream) : (ASTNode * TokenStream) =
         ASTNode.Empty, stream
