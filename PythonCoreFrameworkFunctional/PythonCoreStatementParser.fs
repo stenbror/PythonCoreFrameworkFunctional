@@ -99,7 +99,24 @@ module PythonCoreStatementParser =
         |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expecting 'yield' in yield statement!"))
         
     and ParseRaise(stream: TokenStream, flows: uint * uint) : (ASTNode * TokenStream * (uint * uint)) =
-        ASTNode.Empty, stream, (0u, 0u)
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        |   Some(Token.PyRaise( _ , _ , _ ), rest ) ->
+                let op = List.head stream
+                match TryToken rest with
+                |   Some(Token.PySemiColon( _ , _ , _ ), _ )
+                |   Some(Token.Newline( _ , _ , _ , _ , _ ), _ )
+                |   Some(Token.EOF( _ ), _ ) ->
+                        ASTNode.RaiseStmt(spanStart, GetStartPosition rest, op, ASTNode.Empty, Token.Empty, ASTNode.Empty), rest, flows
+                |   _ ->
+                        let first, rest2 = PythonCoreExpressionParser.ParseTest rest
+                        match TryToken rest2 with
+                        |   Some(Token.PyFrom( _ , _ , _ ), rest3 ) ->
+                                let op2 = List.head rest2
+                                let second, rest4 = PythonCoreExpressionParser.ParseTest rest2
+                                ASTNode.RaiseStmt(spanStart, GetStartPosition rest4, op, first, op2, second), rest4, flows
+                        |   _ ->    ASTNode.RaiseStmt(spanStart, GetStartPosition rest2, op, first, Token.Empty, ASTNode.Empty), rest2, flows
+        |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expecting 'raise' in raise statement!"))
         
     and ParseImport(stream: TokenStream) : (ASTNode * TokenStream) =
         ASTNode.Empty, stream
