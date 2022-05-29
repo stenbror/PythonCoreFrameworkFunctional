@@ -39,7 +39,31 @@ module PythonCoreParser =
         |  _ ->  raise (SyntaxError(GetStartPosition restAgain, "Expecting end of file!"))
         
     let ParseFileInput(stream: TokenStream) : ASTNode =
-        ASTNode.Empty
+        let spanStart = GetStartPosition stream
+        let mutable nodes : ASTNode List = List.Empty
+        let mutable newlines : Token List = List.Empty
+        let mutable restAgain = stream
+        let mutable flows : (uint * uint) = (0u, 0u)
+        
+        while   match TryToken restAgain with
+                |   Some(Token.Newline( _ , _ , _ , _ , _ ), rest) ->
+                        newlines <- List.head restAgain :: newlines
+                        restAgain <- rest
+                        true
+                |   Some(Token.EOF( _ ), _ ) -> false
+                |   _ ->
+                        let res, rest2, flows2 = PythonCoreStatementParser.ParseStmt(restAgain, flows)
+                        nodes <- res :: nodes
+                        restAgain <- rest2
+                        flows <- flows2
+                        true
+            do ()
+        
+        match TryToken restAgain with
+        |   Some(Token.EOF( _ ), _ ) ->
+                ASTNode.FileInput(spanStart, GetStartPosition restAgain,
+                                  List.toArray(List.rev nodes), List.toArray(List.rev newlines), List.head restAgain)
+        |  _ ->  raise (SyntaxError(GetStartPosition restAgain, "Expecting end of file!"))
         
     let ParseSingleInput(stream: TokenStream) : ASTNode =
         ASTNode.Empty
