@@ -347,7 +347,10 @@ module PythonCoreStatementParser =
         |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expecting 'raise' in raise statement!"))
         
     and ParseImport(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        match TryToken stream with
+        |   Some(Token.PyImport( _ , _ , _ ), _ ) ->    ParseImportName stream
+        |   Some(Token.PyFrom( _ , _ , _ ), _ ) ->  ParseImportFrom stream
+        |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expecting 'import' or 'from' statement!"))
         
     and ParseImportName(stream: TokenStream) : (ASTNode * TokenStream) =
         ASTNode.Empty, stream
