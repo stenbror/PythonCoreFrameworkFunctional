@@ -353,7 +353,13 @@ module PythonCoreStatementParser =
         |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expecting 'import' or 'from' statement!"))
         
     and ParseImportName(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        |   Some(Token.PyImport( _ , _ , _), rest) ->
+                let op = List.head stream
+                let right, rest2 = ParseDottedAsNames rest
+                ASTNode.ImportNameStmt(spanStart, GetStartPosition rest2, op, right), rest2
+        |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expecting 'import' in import Statement!"))
         
     and ParseImportFrom(stream: TokenStream) : (ASTNode * TokenStream) =
         ASTNode.Empty, stream

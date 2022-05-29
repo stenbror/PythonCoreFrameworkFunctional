@@ -98,4 +98,5 @@ type ASTNode =
     |   Assign of uint * uint * ASTNode * Token * ASTNode * Token
     |   Annotation of uint * uint * ASTNode * Token * ASTNode
     |   FileInput of uint * uint * ASTNode array * Token array * Token
+    |   ImportNameStmt of uint * uint * Token * ASTNode
     
