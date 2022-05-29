@@ -374,7 +374,27 @@ module PythonCoreStatementParser =
         ASTNode.Empty, stream
         
     and ParseDottedAsNames(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        let mutable nodes : ASTNode List = List.Empty
+        let mutable separators : Token List = List.Empty
+        let mutable restAgain = stream
+        
+        let node, rest = ParseDottedAsName restAgain
+        nodes <- node :: nodes
+        restAgain <- rest
+        
+        while   match TryToken restAgain with
+                |   Some(Token.PyComma( _ , _ , _ ), rest2) ->
+                        separators <- List.head restAgain :: separators
+                        let node2, rest3 = ParseDottedAsName rest2
+                        restAgain <- rest3
+                        nodes <- node2 :: nodes
+                        true
+                |   _ ->    false
+           do ()
+        
+        ASTNode.DottedAsNames(spanStart, GetStartPosition restAgain,
+                              List.toArray(List.rev nodes), List.toArray(List.rev separators)), restAgain
         
     and ParseDottedName(stream: TokenStream) : (ASTNode * TokenStream) =
         let spanStart = GetStartPosition stream

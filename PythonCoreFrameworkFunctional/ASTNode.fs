@@ -100,4 +100,6 @@ type ASTNode =
     |   FileInput of uint * uint * ASTNode array * Token array * Token
     |   ImportNameStmt of uint * uint * Token * ASTNode
     |   DottedName of uint * uint * Token array * Token array
+    |   DottedAsNames of uint * uint * ASTNode array * Token array
+    |   DottedAsName of uint * uint * ASTNode * Token * Token
     
