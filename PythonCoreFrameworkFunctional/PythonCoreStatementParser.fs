@@ -377,7 +377,30 @@ module PythonCoreStatementParser =
         ASTNode.Empty, stream
         
     and ParseDottedName(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        |   Some(Token.Name( _ , _ , _, _ ), rest ) ->
+                let mutable name = List.head stream
+                let mutable nodes : Token List = List.Empty
+                let mutable restAgain = rest
+                let mutable dots : Token List = List.Empty
+                nodes <- name :: nodes
+                
+                while   match TryToken restAgain with
+                        |   Some(Token.PyDot( _ , _ , _ ), rest2) ->
+                                dots <- List.head restAgain :: dots
+                                match TryToken rest2 with
+                                |   Some(Token.Name( _ , _ , _ , _ ), rest3) ->
+                                        nodes <- List.head rest2 :: nodes
+                                        restAgain <- rest3
+                                        true
+                                |   _ ->
+                                        raise (SyntaxError(GetStartPosition rest2, "Expecting name literal after '.' in import name!"))
+                        |   _ ->    false
+                     do ()
+                
+                ASTNode.DottedName(spanStart, GetStartPosition restAgain, List.toArray(List.rev nodes), List.toArray(List.rev dots)), restAgain
+        |   _ ->    raise (SyntaxError(GetStartPosition stream, "Expecting name literal in import name!"))
         
     and ParseGlobal(stream: TokenStream) : (ASTNode * TokenStream) =
         ASTNode.Empty, stream
