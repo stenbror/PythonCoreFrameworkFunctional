@@ -84,7 +84,127 @@ module PythonCoreStatementParser =
                 node, rest, flows
         
     and ParseExpr(stream: TokenStream) : (ASTNode * TokenStream) =
-        ASTNode.Empty, stream
+        let spanStart = GetStartPosition stream
+        let left, rest1 = PythonCoreExpressionParser.ParseTestListStarExpr stream
+        match TryToken rest1 with
+        |   Some(Token.PyPlusAssign( _ , _ , _ ), rest2) ->
+                let op = List.head rest1
+                match TryToken rest2 with
+                |   Some(Token.PyYield( _ , _ , _ ), _ ) ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseYieldExpr rest2
+                        ASTNode.PlusAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+                |   _ ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseTestListStarExpr rest2
+                        ASTNode.PlusAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+        |   Some(Token.PyMinusAssign( _ , _ , _ ), rest2) ->
+                let op = List.head rest1
+                match TryToken rest2 with
+                |   Some(Token.PyYield( _ , _ , _ ), _ ) ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseYieldExpr rest2
+                        ASTNode.MinusAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+                |   _ ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseTestListStarExpr rest2
+                        ASTNode.MinusAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+        |   Some(Token.PyMulAssign( _ , _ , _ ), rest2) ->
+                let op = List.head rest1
+                match TryToken rest2 with
+                |   Some(Token.PyYield( _ , _ , _ ), _ ) ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseYieldExpr rest2
+                        ASTNode.MulAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+                |   _ ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseTestListStarExpr rest2
+                        ASTNode.MulAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+        |   Some(Token.PyPowerAssign( _ , _ , _ ), rest2) ->
+                let op = List.head rest1
+                match TryToken rest2 with
+                |   Some(Token.PyYield( _ , _ , _ ), _ ) ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseYieldExpr rest2
+                        ASTNode.PowerAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+                |   _ ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseTestListStarExpr rest2
+                        ASTNode.PowerAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+        |   Some(Token.PyDivAssign( _ , _ , _ ), rest2) ->
+                let op = List.head rest1
+                match TryToken rest2 with
+                |   Some(Token.PyYield( _ , _ , _ ), _ ) ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseYieldExpr rest2
+                        ASTNode.DivAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+                |   _ ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseTestListStarExpr rest2
+                        ASTNode.DivAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+        |   Some(Token.PyFloorDivAssign( _ , _ , _ ), rest2) ->
+                let op = List.head rest1
+                match TryToken rest2 with
+                |   Some(Token.PyYield( _ , _ , _ ), _ ) ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseYieldExpr rest2
+                        ASTNode.FloorDivAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+                |   _ ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseTestListStarExpr rest2
+                        ASTNode.FloorDivAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+        |   Some(Token.PyModuloAssign( _ , _ , _ ), rest2) ->
+                let op = List.head rest1
+                match TryToken rest2 with
+                |   Some(Token.PyYield( _ , _ , _ ), _ ) ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseYieldExpr rest2
+                        ASTNode.ModuloAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+                |   _ ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseTestListStarExpr rest2
+                        ASTNode.ModuloAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+        |   Some(Token.PyMatriceAssign( _ , _ , _ ), rest2) ->
+                let op = List.head rest1
+                match TryToken rest2 with
+                |   Some(Token.PyYield( _ , _ , _ ), _ ) ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseYieldExpr rest2
+                        ASTNode.MatriceAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+                |   _ ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseTestListStarExpr rest2
+                        ASTNode.MatriceAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+        |   Some(Token.PyShiftLeftAssign( _ , _ , _ ), rest2) ->
+                let op = List.head rest1
+                match TryToken rest2 with
+                |   Some(Token.PyYield( _ , _ , _ ), _ ) ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseYieldExpr rest2
+                        ASTNode.ShiftLeftAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+                |   _ ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseTestListStarExpr rest2
+                        ASTNode.ShiftLeftAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+        |   Some(Token.PyShiftRightAssign( _ , _ , _ ), rest2) ->
+                let op = List.head rest1
+                match TryToken rest2 with
+                |   Some(Token.PyYield( _ , _ , _ ), _ ) ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseYieldExpr rest2
+                        ASTNode.ShiftRightAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+                |   _ ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseTestListStarExpr rest2
+                        ASTNode.ShiftRightAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+        |   Some(Token.PyBitAndAssign( _ , _ , _ ), rest2) ->
+                let op = List.head rest1
+                match TryToken rest2 with
+                |   Some(Token.PyYield( _ , _ , _ ), _ ) ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseYieldExpr rest2
+                        ASTNode.BitAndAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+                |   _ ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseTestListStarExpr rest2
+                        ASTNode.BitAndAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+        |   Some(Token.PyBitOrAssign( _ , _ , _ ), rest2) ->
+                let op = List.head rest1
+                match TryToken rest2 with
+                |   Some(Token.PyYield( _ , _ , _ ), _ ) ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseYieldExpr rest2
+                        ASTNode.BitOrAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+                |   _ ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseTestListStarExpr rest2
+                        ASTNode.BitOrAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+        |   Some(Token.PyBitXorAssign( _ , _ , _ ), rest2) ->
+                let op = List.head rest1
+                match TryToken rest2 with
+                |   Some(Token.PyYield( _ , _ , _ ), _ ) ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseYieldExpr rest2
+                        ASTNode.BitXorAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+                |   _ ->
+                        let right, rest4 = PythonCoreExpressionParser.ParseTestListStarExpr rest2
+                        ASTNode.BitXorAssign(spanStart, GetStartPosition rest4, left, op, right), rest4
+        |   _ ->    left, rest1
         
     and ParseDel(stream: TokenStream) : (ASTNode * TokenStream) =
         let spanStart = GetStartPosition stream
