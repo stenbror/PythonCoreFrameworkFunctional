@@ -22,3 +22,16 @@ module TestPythonCoreStatementRules =
          
          Assert.Equal( (0u, 0u), flows)
          Assert.True(rest.Length = 1)
+         
+         
+         
+         
+    [<Fact>]
+    let ```Test`integration between toklenizer and parser for statement`` () =
+         let node = "pass\r\n" |> PythonCoreTokenizer.TokenizeFromString |> PythonCoreParser.ParseFileInput
+         
+         Assert.Equal( ASTNode.FileInput(0u, 6u, [|
+                                    ASTNode.SimpleStmt(0u, 6u, [|
+                                        ASTNode.PassStmt(0u, 4u, Token.PyPass(0u, 4u, [|  |]))
+                                    |], [|  |], Token.Newline(4u, 6u, '\r', '\n', [|  |]))
+                                |], [|  |], Token.EOF(6u)), node)
